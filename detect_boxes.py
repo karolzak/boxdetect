@@ -32,19 +32,13 @@ if __name__ == "__main__":
 	args = vars(ap.parse_args())
 
 	# parameters
-	min_w, max_w = (45, 50)
-	min_h, max_h = (55, 60)
-	min_w = round(min_w/4)
-	max_w = round(max_w/2)
-	min_h = round(min_h/4)
-	max_h = round(max_h/2)
+	min_w, max_w = (40, 50)
+	min_h, max_h = (50, 60)
 
-	area_range = (round(min_w*min_h*0.80), round(max_w*max_h*1.00))
-
-	wh_ratio_range = (0.75, 9.0)
+	wh_ratio_range = (0.6, 1.0)
 	padding = 1
-	thickness = 1
-
+	thickness = 2
+	processing_time_width = 1500
 
 	images = glob.glob(args["image_dir"] + '*')
 	plot = bool(args["plot"])
@@ -58,9 +52,26 @@ if __name__ == "__main__":
 		# image =  PIL.ImageOps.invert(image)
 		# image_org = np.asarray(image)
 		image_org = cv2.imread(img_path)
-		image_org = imutils.resize(image_org, width=image_org.shape[0]//4)
 
+		resize_ratio = image_org.shape[1] / processing_time_width
+		resize_ratio_inv = processing_time_width / image_org.shape[1]
+
+		min_w_res = int(min_w * resize_ratio_inv)
+		max_w_res = int(max_w * resize_ratio_inv)
+		min_h_res = int(min_h * resize_ratio_inv)
+		max_h_res = int(max_h * resize_ratio_inv)
+
+		area_range = (
+			round(min_w_res * max_w_res * 0.80),
+			round(max_w_res * max_h_res * 1.00)
+		)		
+
+		# resize the image for processing time
 		image = image_org.copy()
+		image = imutils.resize(image, width=processing_time_width)
+		# image_org = imutils.resize(image_org, width=image_org.shape[0]//4)
+
+
 		# convert the resized image to grayscale
 		image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 		# apply tresholding to get all the pixel values to either 0 or 255
@@ -73,23 +84,24 @@ if __name__ == "__main__":
 		if plot:
 			cv2.imshow("thresh", image)
 			cv2.waitKey(0)
-			
+
 		# creating line-shape kernels to be used for image enhancing step
+		# try it out only in case of very poor results with previous setup
 		# kernels = get_line_kernels(length=4)
 		# image = enhance_image(image, kernels, plot)
 
 		# creating rectangular-shape kernels to be used for extracting rectangular shapes		
 		kernels = get_rect_kernels(
 			wh_ratio_range = wh_ratio_range,
-			min_w = min_w,	max_w = max_w,
-			min_h = min_h,	max_h = max_h,
+			min_w = min_w_res,	max_w = max_w_res,
+			min_h = min_h_res,	max_h = max_h_res,
 			pad=padding)
 		image = enhance_rectangles(image, kernels, plot)
 
 		# find contours in the thresholded image and initialize the
 		# shape detector
 		cnts = get_contours(image)
-		image_org = draw_contours(image_org, cnts, area_range, thickness=thickness)
+		image_org = draw_contours(image_org, cnts, resize_ratio, area_range, thickness=thickness)
 		if plot:
 			cv2.imshow("Org image with boxes", image_org)
 			cv2.waitKey(0)
