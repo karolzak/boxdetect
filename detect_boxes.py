@@ -16,7 +16,8 @@ from helpers import (
 	get_line_kernels, get_rect_kernels,
 	get_contours, apply_thresholding,
 	enhance_image, enhance_rectangles,
-	draw_contours
+	draw_contours, rescale_contours,
+	filter_contours_by_area_size
 )
 
 
@@ -38,13 +39,13 @@ if __name__ == "__main__":
 	wh_ratio_range = (0.6, 1.0)
 	padding = 1
 	thickness = 2
-	processing_time_width = 1500
+	processing_time_width = 1000
 
 	images = glob.glob(args["image_dir"] + '*')
 	plot = bool(args["plot"])
 	print(args["image_dir"], plot)
 
-	for img_path in images[3:4]:
+	for img_path in images[:]:
 		print(img_path)
 		# load the image and resize it to a smaller factor so that
 		# the shapes can be approximated better
@@ -101,7 +102,9 @@ if __name__ == "__main__":
 		# find contours in the thresholded image and initialize the
 		# shape detector
 		cnts = get_contours(image)
-		image_org = draw_contours(image_org, cnts, resize_ratio, area_range, thickness=thickness)
+		cnts = filter_contours_by_area_size(cnts, area_range)
+		cnts = rescale_contours(cnts, resize_ratio)
+		image_org = draw_contours(image_org, cnts, thickness=thickness)
 		if plot:
 			cv2.imshow("Org image with boxes", image_org)
 			cv2.waitKey(0)
