@@ -21,7 +21,7 @@ def enhance_rectangles(image, kernels, plot=False):
 def enhance_image(image, kernels, plot=False):
 	new_image = np.zeros_like(image)
 	for kernel in kernels:
-		morphs = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=2)
+		morphs = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=1)
 
 		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,1))
 		morphs = cv2.dilate(morphs, kernel, iterations = 1)
@@ -121,18 +121,34 @@ def get_contours(image):
 	return cnts
 
 
-def draw_contours(image, cnts, area_range=(2000,3000), thickness=1):
-	# loop over the contours
+def filter_contours_by_area_size(cnts, area_range):
+	cnts_filtered = []
 	for c in cnts:
 		area = cv2.contourArea(c)
-
 		if area > area_range[0] and area < area_range[1]:
-		# if area > 50:
-			shape = detect_shape(c)
-			# if shape == "unidentified":
-			# 	continue
-		else:
-			continue
+			cnts_filtered.append(c)
+	return cnts_filtered
 
+
+def rescale_contours(cnts, ratio):
+	cnts_rescaled = []
+	for c in cnts:
+		c = c.astype("float")
+		c *= ratio
+		c = c.astype("int")
+		cnts_rescaled.append(c)
+	return cnts_rescaled
+
+
+def merge_contours(cnts):
+	return cnts
+
+
+def draw_contours(image, cnts, thickness=1):
+	# loop over the contours
+	for c in cnts:
+		shape = detect_shape(c)
+		# if shape == "unidentified":
+		# 	continue
 		cv2.drawContours(image, [c], -1, (0, 255, 0), thickness)
 	return image
