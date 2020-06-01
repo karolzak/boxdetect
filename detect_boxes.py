@@ -8,28 +8,49 @@ from PIL import Image
 import numpy as np
 import PIL.ImageOps  
 import glob
+import imutils
+
 import sys
-sys.path.append('./box_detector')
-from box_detector.helpers import (
+sys.path.append('./box-detector/')
+from helpers import (
 	get_line_kernels, get_rect_kernels,
-	get_contours, apply_thresholding
+	get_contours, apply_thresholding,
+	enhance_image, enhance_rectangles,
+	draw_contours
 )
 
 
 if __name__ == "__main__":		
 	# construct the argument parse and parse the arguments
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-i", "--image_dir", required=True,
+	ap.add_argument("-d", "--image_dir", required=True,
 		help="path to the input dir")
 	ap.add_argument("-p", "--plot", type=bool, default=False, required=False,
 		help="plot results")
+	ap.add_argument("-mp", "--multiprocessing", type=bool, default=False, required=False,
+		help="use multiprocessing")
 	args = vars(ap.parse_args())
+
+	# parameters
+	min_w, max_w = (45, 50)
+	min_h, max_h = (55, 60)
+	min_w = round(min_w/4)
+	max_w = round(max_w/2)
+	min_h = round(min_h/4)
+	max_h = round(max_h/2)
+
+	area_range = (round(min_w*min_h*0.80), round(max_w*max_h*1.00))
+
+	wh_ratio_range = (0.75, 9.0)
+	padding = 1
+	thickness = 1
+
 
 	images = glob.glob(args["image_dir"] + '*')
 	plot = bool(args["plot"])
 	print(args["image_dir"], plot)
 
-	for img_path in images[:1]:
+	for img_path in images[3:4]:
 		print(img_path)
 		# load the image and resize it to a smaller factor so that
 		# the shapes can be approximated better
@@ -37,69 +58,43 @@ if __name__ == "__main__":
 		# image =  PIL.ImageOps.invert(image)
 		# image_org = np.asarray(image)
 		image_org = cv2.imread(img_path)
-		# image_org = imutils.resize(image_org, width=image_org.shape[0]//2)
+		image_org = imutils.resize(image_org, width=image_org.shape[0]//4)
 
 		image = image_org.copy()
 		# convert the resized image to grayscale
 		image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		image = apply_thresholding(image)
-		if plot:
-			cv2.imshow("thresh", image)
-			cv2.waitKey(0)
+		# apply tresholding to get all the pixel values to either 0 or 255
+		# this function also inverts colors (black pixels will become the background)
+		image = apply_thresholding(image, plot)
 
+		# basic pixel inflation
 		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
 		image = cv2.dilate(image, kernel, iterations = 1)
-		
 		if plot:
 			cv2.imshow("thresh", image)
 			cv2.waitKey(0)
+			
+		# creating line-shape kernels to be used for image enhancing step
+		# kernels = get_line_kernels(length=4)
+		# image = enhance_image(image, kernels, plot)
 
-		kernels = get_line_kernels(length=5)
-
-		new_image = np.zeros_like(image)
-		for kernel in kernels:
-			morphs = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=2)
-
-			kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,1))
-			morphs = cv2.dilate(morphs, kernel, iterations = 1)
-
-			kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,3))
-			morphs = cv2.dilate(morphs, kernel, iterations = 1)
-
-			morphs = cv2.morphologyEx(morphs, cv2.MORPH_OPEN, kernel, iterations=1)
-			new_image += morphs		
-		image = new_image			
-		image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]
-
-		if plot:
-			cv2.imshow("thresh", image)
-			cv2.waitKey(0)
-		
+		# creating rectangular-shape kernels to be used for extracting rectangular shapes		
 		kernels = get_rect_kernels(
-			wh_ratio_range = (0.5, 1.0),
-			min_w = 45,	max_w = 50,
-			min_h = 55,	max_h = 60,
-			pad=1)
-
-		new_image = np.zeros_like(image)
-		for kernel in kernels:
-			morphs = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
-			new_image += morphs			
-		image = new_image
-		image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]
-
-		if plot:
-			cv2.imshow("thresh", image)
-			cv2.waitKey(0)
+			wh_ratio_range = wh_ratio_range,
+			min_w = min_w,	max_w = max_w,
+			min_h = min_h,	max_h = max_h,
+			pad=padding)
+		image = enhance_rectangles(image, kernels, plot)
 
 		# find contours in the thresholded image and initialize the
 		# shape detector
-		image_org = get_contours(image, image_org, area_range=(2000,3000), thickness=2)
+		cnts = get_contours(image)
+		image_org = draw_contours(image_org, cnts, area_range, thickness=thickness)
 		if plot:
-			cv2.imshow("Image", image_org)
+			cv2.imshow("Org image with boxes", image_org)
 			cv2.waitKey(0)
 
-	cv2.imwrite(img_path.replace('\\in','\\out'), image_org)
+		cv2.imwrite(img_path.replace('\\in','\\out'), image_org)
 
 			# masked_image = cv2.addWeighted(
 			# 	image_org, 1.0,
