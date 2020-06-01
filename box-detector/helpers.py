@@ -3,26 +3,67 @@ import numpy as np
 import imutils
 
 
-def apply_thresholding(image):
-    otsu  = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)[1]
-    binary = cv2.threshold(image, np.mean(image) , 255, cv2.THRESH_BINARY_INV)[1]
-    image = otsu + binary
+def enhance_rectangles(image, kernels, plot=False):
+	new_image = np.zeros_like(image)
+	for kernel in kernels:
+		morphs = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
+		new_image += morphs
+	image = new_image
+	image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]
+
+	if plot:
+		cv2.imshow("rectangular shape enhanced image", image)
+		cv2.waitKey(0)
+	
+	return image
+
+
+def enhance_image(image, kernels, plot=False):
+	new_image = np.zeros_like(image)
+	for kernel in kernels:
+		morphs = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,1))
+		morphs = cv2.dilate(morphs, kernel, iterations = 1)
+
+		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,3))
+		morphs = cv2.dilate(morphs, kernel, iterations = 1)
+
+		morphs = cv2.morphologyEx(morphs, cv2.MORPH_OPEN, kernel, iterations=1)
+		new_image += morphs
+	image = new_image
+	image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]
+
+	if plot:
+		cv2.imshow("enhanced image", image)
+		cv2.waitKey(0)
+
+	return image
+
+
+def apply_thresholding(image, plot=False):
+	otsu  = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+	binary = cv2.threshold(image, np.mean(image) , 255, cv2.THRESH_BINARY_INV)[1]
+	image = otsu + binary
 	# image = cv2.threshold(image, np.median(image), 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
 
 	# image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
 	#             cv2.THRESH_BINARY_INV,5,3)
 	# image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
 	#             cv2.THRESH_BINARY_INV,3,5)
-    return image
+	if plot:
+		cv2.imshow("thresholded image", image)
+		cv2.waitKey(0)
+	return image
 
 
 def get_rect_kernels(
-		wh_ratio_range = (0.5, 1.1),
-		min_w = 40,
-		max_w = 60,
-		min_h = 40,
-		max_h = 65,
-		pad = 1
+		wh_ratio_range=(0.5, 1.1),
+		min_w=40,
+		max_w=60,
+		min_h=40,
+		max_h=65,
+		pad=1
 	):
 
 	kernels = [
@@ -69,19 +110,22 @@ def detect_shape(c):
 	return shape
 
 
-def get_contours(image, image_org, area_range=(2000,3000), thickness=1):
+def get_contours(image):
 	# find contours in the thresholded image
 	cnts = cv2.findContours(
-		image,
+		image.copy(),
 		cv2.RETR_LIST,
 		cv2.CHAIN_APPROX_SIMPLE
 	)
 	cnts = imutils.grab_contours(cnts)
+	return cnts
 
+
+def draw_contours(image, cnts, area_range=(2000,3000), thickness=1):
 	# loop over the contours
 	for c in cnts:
 		area = cv2.contourArea(c)
-		
+
 		if area > area_range[0] and area < area_range[1]:
 		# if area > 50:
 			shape = detect_shape(c)
@@ -90,5 +134,5 @@ def get_contours(image, image_org, area_range=(2000,3000), thickness=1):
 		else:
 			continue
 
-		cv2.drawContours(image_org, [c], -1, (0, 255, 0), thickness)
-	return image_org
+		cv2.drawContours(image, [c], -1, (0, 255, 0), thickness)
+	return image
