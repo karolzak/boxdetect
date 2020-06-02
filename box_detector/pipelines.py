@@ -31,6 +31,13 @@ def process_image(img, config, plot=False):
     thickness = config.thickness
     scaling_factors = config.scaling_factors
 
+    dilation_kernel = config.dilation_kernel
+    dilation_iterations = config.dilation_iterations
+
+    min_group_size = config.min_group_size 
+    vertical_max_distance = config.vertical_max_distance
+    horizontal_max_distance_multiplier = config.horizontal_max_distance_multiplier
+
     # process image using range of scaling factors
     cnts_list = []
     for scaling_factor in scaling_factors:
@@ -58,8 +65,10 @@ def process_image(img, config, plot=False):
     	image = apply_thresholding(image, plot) 
 
     	# basic pixel inflation
-    	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    	image = cv2.dilate(image, kernel, iterations = 2)
+    	kernel = cv2.getStructuringElement(
+            cv2.MORPH_RECT, dilation_kernel)
+    	image = cv2.dilate(
+            image, kernel, iterations=dilation_iterations)
     	if plot:
     		cv2.imshow("dilated", image)
     		cv2.waitKey(0)
@@ -75,7 +84,8 @@ def process_image(img, config, plot=False):
     		min_w = min_w_res,	max_w = max_w_res,
     		min_h = min_h_res,	max_h = max_h_res,
     		pad=padding)
-    	image = enhance_rectangles(image, kernels, plot)    
+    	image = enhance_rectangles(
+            image, kernels, plot)    
 
     	# find contours in the thresholded image
     	cnts = get_contours(image)
@@ -93,10 +103,12 @@ def process_image(img, config, plot=False):
     mean_height = np.mean(rects[:,3])
     # group rectangles vertically (line by line)
     vertical_rect_groups = group_rects(
-        rects, max_distance=10, min_group_size=2, grouping_mode='vertical')
+        rects, max_distance=vertical_max_distance,
+        min_group_size=min_group_size, grouping_mode='vertical')
     # group rectangles horizontally (horizontally cluster nearby rects)
     rect_groups = get_groups_from_groups(
-        vertical_rect_groups, max_distance=mean_width * 4, min_group_size=2, grouping_mode='horizontal')
+        vertical_rect_groups, max_distance=mean_width * horizontal_max_distance_multiplier,
+        min_group_size=min_group_size, grouping_mode='horizontal')
     # get grouping rectangles
     grouping_rectangles = get_grouping_rectangles(rect_groups)
 
