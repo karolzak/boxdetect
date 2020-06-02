@@ -5,4 +5,4 @@ min_h, max_h = (50, 60)
 wh_ratio_range = (0.65, 0.9)
 padding = 1
 thickness = 2
-processing_time_widths = [800, 1000, 1300, 1400, 1600, 2600]
+scaling_factors = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
