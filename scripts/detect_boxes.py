@@ -10,8 +10,8 @@ import cv2
 import imutils
 import numpy as np
 
-from box_detector import config
-from box_detector.pipelines import process_image
+from boxdetect import config
+from boxdetect.pipelines import process_image
 
 
 if __name__ == "__main__":		

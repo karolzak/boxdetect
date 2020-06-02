@@ -2,14 +2,14 @@ import cv2
 import imutils
 import numpy as np
 
-from box_detector.rect_proc import (
+from boxdetect.rect_proc import (
     filter_contours_by_area_size,
     filter_contours_by_rect_ratio,
     get_bounding_rect, get_contours,
     get_grouping_rectangles,
     get_groups_from_groups,
     group_countours, group_rects, rescale_contours)
-from box_detector.img_proc import (
+from boxdetect.img_proc import (
     apply_thresholding, draw_rects,
     get_line_kernels, get_rect_kernels,
     enhance_image, enhance_rectangles)
