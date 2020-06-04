@@ -3,11 +3,11 @@ import numpy as np
 import imutils
 
 
-def group_countours(cnts):
+def group_countours(cnts, overlap_threshold=0.5):
     rects = [get_bounding_rect(c)[:4] for c in cnts]
     # we need to duplicate all the rects for grouping below to work
     rects += rects
-    rects, weights = cv2.groupRectangles(rects, 1, 0.2)
+    rects, weights = cv2.groupRectangles(rects, 1, overlap_threshold)
     return rects
 
 
@@ -50,7 +50,7 @@ def filter_contours_by_area_size(cnts, area_range):
     cnts_filtered = []
     for c in cnts:
         area = cv2.contourArea(c)
-        if area > area_range[0] and area < area_range[1]:
+        if area >= area_range[0] and area <= area_range[1]:
             cnts_filtered.append(c)
     return cnts_filtered
 
