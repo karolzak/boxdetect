@@ -34,14 +34,14 @@ Start with getting the default config and modifying it for your requirements and
 ```python
 from boxdetect import config
 
-file_name = 'bank_form1.png'
+file_name = 'form_example1.png'
 # important to adjust these values to match the size of boxes on your image
 config.min_w, config.max_w = (35,48)
-config.min_h, config.max_h = (30,37)
+config.min_h, config.max_h = (30,39)
 # the more scaling factors the more accurate the results but also it takes more time to processing
 # too small scaling factor may cause false positives
 # too big scaling factor will take a lot of processing time
-config.scaling_factors = [0.4, 0.5, 0.7]
+config.scaling_factors = [0.7, 1.0]
 # w/h ratio range for boxes/rectangles filtering
 config.wh_ratio_range = (0.5, 1.5)
 # num of iterations when running dilation tranformation (to engance the image)
