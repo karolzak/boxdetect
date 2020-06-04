@@ -36,7 +36,7 @@ def get_boxes(img, config, plot=False):
     dilation_kernel = config.dilation_kernel
     dilation_iterations = config.dilation_iterations
 
-    min_group_size = config.min_group_size
+    group_size_range = config.group_size_range
     vertical_max_distance = config.vertical_max_distance
     horizontal_max_distance_multiplier = config.horizontal_max_distance_multiplier  # NOQA E501
 
@@ -111,12 +111,12 @@ def get_boxes(img, config, plot=False):
     # group rectangles vertically (line by line)
     vertical_rect_groups = group_rects(
         rects, max_distance=vertical_max_distance,
-        min_group_size=min_group_size, grouping_mode='vertical')
+        grouping_mode='vertical')
     # group rectangles horizontally (horizontally cluster nearby rects)
     rect_groups = get_groups_from_groups(
         vertical_rect_groups,
         max_distance=mean_width * horizontal_max_distance_multiplier,
-        min_group_size=min_group_size, grouping_mode='horizontal')
+        group_size_range=group_size_range, grouping_mode='horizontal')
     # get grouping rectangles
     grouping_rectangles = get_grouping_rectangles(rect_groups)
 
