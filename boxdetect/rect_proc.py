@@ -128,9 +128,8 @@ def group_rects(
             new_groups.append(temp_group)
             temp_group = []
             temp_group.append(rect2)
+    new_groups.append(temp_group)
 
-        if i == len(rects_sorted) - 1:
-            new_groups.append(temp_group)
     group_range = list(range(group_size_range[0], group_size_range[1]+1))
 
     new_groups = [
