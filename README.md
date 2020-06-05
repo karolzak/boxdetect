@@ -77,3 +77,14 @@ plt.show()
 ```
 
 ![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/example1.png)
+
+#### Highlighting checkboxes:
+
+And if you would like to highlight only the checkboxes you just need to change a single parameter:
+```python
+# limit down the grouping algorithm to just singular boxes (e.g. checkboxes)
+config.group_size_range = (1, 1)
+```
+
+![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/checkbox-example.jpg)
+
