@@ -27,5 +27,5 @@ group_size_range = (1, 100)  # minimum number of rectangles in a group, >2 - wil
 vertical_max_distance = 10  # in pixels
 # Multiplier to be used with mean width of all the rectangles detected
 # E.g. for multiplier of 4 the maximum distance between boxes to be grouped together will be:  # NOQA E501
-# max_horizontal_distance = np.mean(all_rect_widths) * 4
-horizontal_max_distance_multiplier = 2
+# max_horizontal_distance = np.mean(all_rect_widths) * 3
+horizontal_max_distance_multiplier = 3
