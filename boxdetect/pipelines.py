@@ -55,10 +55,10 @@ def get_boxes(img, config, plot=False):
         ch = 1
 
     # parameters
-    min_w, max_w = (config.min_w, config.max_w)
-    min_h, max_h = (config.min_h, config.max_h)
+    width_range = config.width_range
+    height_range = config.height_range
     wh_ratio_range = config.wh_ratio_range
-    padding = config.padding
+    border_thickness = config.border_thickness
     thickness = config.thickness
     scaling_factors = config.scaling_factors
 
@@ -80,14 +80,14 @@ def get_boxes(img, config, plot=False):
         resize_ratio = image_org.shape[0] / image.shape[0]
         resize_ratio_inv = image.shape[0] / image_org.shape[0]
 
-        min_w_res = int(min_w * resize_ratio_inv)
-        max_w_res = int(max_w * resize_ratio_inv)
-        min_h_res = int(min_h * resize_ratio_inv)
-        max_h_res = int(max_h * resize_ratio_inv)
+        min_w = int(width_range[0] * resize_ratio_inv)
+        max_w = int(width_range[1] * resize_ratio_inv)
+        min_h = int(height_range[0] * resize_ratio_inv)
+        max_h = int(height_range[1] * resize_ratio_inv)
 
         area_range = (
-            round(min_w_res * min_h_res * 0.90),
-            round(max_w_res * max_h_res * 1.00)
+            round(min_w * min_h * 1.00),
+            round(max_w * max_h * 1.00)
         )
         # convert the resized image to grayscale
         try:
@@ -113,15 +113,19 @@ def get_boxes(img, config, plot=False):
         # creating line-shape kernels to be used for image enhancing step
         # try it out only in case of very poor results with previous setup
         # kernels = get_line_kernels(length=4)
-        # image = enhance_image(image, kernels, plot)
+        # image = img_proc.apply_merge_transformations(
+        #     image, kernels, plot=plot,
+        #     transformations=[
+        #         (cv2.MORPH_CLOSE, 2),
+        #         (cv2.MORPH_OPEN, 2)
+        #     ])
 
         # creating rectangular-shape kernels to be used for
         # extracting rectangular shapes
         kernels = img_proc.get_rect_kernels(
+            width_range=(min_w, max_w), height_range=(min_h, max_h),
             wh_ratio_range=wh_ratio_range,
-            min_w=min_w_res,	max_w=max_w_res,
-            min_h=min_h_res,	max_h=max_h_res,
-            pad=padding)
+            border_thickness=border_thickness)
         image = img_proc.apply_merge_transformations(
             image, kernels, plot=plot)
 
@@ -156,7 +160,7 @@ def get_boxes(img, config, plot=False):
 
     if ch == 1:
         image_org = cv2.cvtColor(image_org, cv2.COLOR_GRAY2BGR)
-        # image_org = np.repeat(np.expand_dims(image_org, axis=-1), 3, axis=-1)
+
     # draw character rectangles on original image
     image_org = img_proc.draw_rects(
         image_org, rects, color=(0, 255, 0), thickness=thickness)

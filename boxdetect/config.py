@@ -1,18 +1,18 @@
 # Important to adjust these values to match the size of boxes on your image
-min_w, max_w = (40, 50)
-min_h, max_h = (50, 60)
+width_range = (40, 50)
+height_range = (50, 60)
 
 # w/h ratio range for boxes/rectangles filtering
 wh_ratio_range = (0.65, 0.1)
+
+# Rectangular kernels border thickness
+border_thickness = 1
 
 # The more scaling factors the more accurate the results
 # but also it takes more time to processing.
 # Too small scaling factor may cause false positives
 # Too big scaling factor will take a lot of processing time
 scaling_factors = [0.5]
-
-# Rectangle kernel padding
-padding = 1
 
 # Drawing rectangles
 thickness = 2
