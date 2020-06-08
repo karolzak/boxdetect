@@ -1,11 +1,4 @@
-import pytest
 import numpy as np
-import cv2
-import sys
-sys.path.append(".")
-sys.path.append("../.")
-
-from boxdetect import config
 from boxdetect import rect_proc
 
 
