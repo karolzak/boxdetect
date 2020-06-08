@@ -2,10 +2,30 @@ import cv2
 import numpy as np
 
 
-def enhance_rectangles(image, kernels, plot=False):
+def apply_merge_transformations(
+        image, kernels, transform=cv2.MORPH_OPEN, plot=False):
+    """
+    Process image by applying morphological transformations using OpenCV.
+    It takes in a list of kernels as an input and itterates through that list applying each transormation to input image and merges all the results back together later.
+
+    Args:
+        image (numpy.ndarray):
+            Input image.
+        kernels (list of numpy.ndarray):
+            List of kernels to be used for morphological transformations.
+        transform (cv2.MORPH_* object):
+            Type of OpenCV Morphological transofrmation to be used.
+        plot (bool, optional): 
+            Display intermediate results of transformations. 
+            Defaults to False.
+
+    Returns:
+        numpy.ndarray:
+            Merged results of all the transformations
+    """ # NOQA E501
     new_image = np.zeros_like(image)
     for kernel in kernels:
-        morphs = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
+        morphs = cv2.morphologyEx(image, transform, kernel, iterations=1)
         new_image += morphs
     image = new_image
     image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]

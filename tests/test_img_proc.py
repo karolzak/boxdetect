@@ -1,12 +1,8 @@
-import pytest
 import cv2
-import imutils
-# import numpy as np
 import sys
 sys.path.append(".")
 sys.path.append("../.")
-from boxdetect import config
-from boxdetect import img_proc
+from boxdetect import config, img_proc
 
 
 def DefaultConfig():
@@ -23,7 +19,7 @@ IMG1 = cv2.imread("tests/data/tests_color_enhance1.png")
 IMG2 = cv2.imread("tests/data/tests_color_enhance2.png")
 
 
-def test_enhance_rectangles():
+def test_apply_merge_transformations():
     cfg = DefaultConfig()
 
     resize_ratio_inv = 0.4166666666666667
@@ -37,5 +33,5 @@ def test_enhance_rectangles():
         min_w=min_w_res, max_w=max_w_res,
         min_h=min_h_res, max_h=max_h_res,
         pad=cfg.padding)
-    image = img_proc.enhance_rectangles(IMG1.copy(), kernels)
+    image = img_proc.apply_merge_transformations(IMG1.copy(), kernels)
     assert((image == IMG2.copy()).all())
