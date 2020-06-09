@@ -5,9 +5,89 @@ import numpy as np
 from . import rect_proc, img_proc
 
 
+def get_checkboxes(img, config, px_threshold=0.1, plot=False):
+    """    
+    Pipeline function to extract checkboxes locations from input image along with an estimation if pixels are present inside that checkbox.
+    Short description of pipeline steps:
+    - read image from a path or from `numpy.ndarray`
+    - run an image processing iteration for every value provided in `config.scaling_factors` list:
+        - resize image based on `scaling_factor`
+        - try convert to grayscale
+        - apply otsu thresholding
+        - run dilation based on `config` params. If `config.dilation_iterations=0` this step will be skipped
+        - process image with morphological transformations to extract rectangular shapes based on `config` params
+        - get contours from transformed images and filter them based on area size and `config.wh_ratio_range`
+    - aggregate contours from all the iterations and merge overlapping countours
+    - convert contours to rectangles `(x, y, width, height)`
+    - group rectangles first vertically and then horizontally based on `config.vertical_max_distance` and `config.horizontal_max_distance_multiplier`
+    - extract groups of boxes which have only a single box inside (checkboxes)
+    - run estimation function to determine if checkbox contains pixels (naive approach for checking if it's checked)
+    - return an array of arrays with following information for each detected checkbox: `[checkbox_coords, contains_pixels, cropped_checkbox]`                    
+        - checkbox_coords - `numpy.ndarray` rectangle (x,y,width,height)
+        - contains_pixels - `bool`, True/False
+        - cropped_checkbox - `numpy.ndarray` of cropped checkbox image
+
+    Args:
+        img (str or numpy.ndarray):
+            Input image. Can be passed in either as
+            `string` (filepath) or as `numpy.ndarray` represting an image
+        config (boxdetect.config object):
+            Object holding all the necessary settings to run this pipeline
+        px_threshold (float, optional):
+            This is the threshold used when estimating if pixels are present inside the checkbox.
+            Defaults to 0.1.
+        plot (bool, optional):
+            Display different stages of image being processed.
+            Defaults to False.
+
+    Returns:
+        numpy.ndarray:
+            Return an array of arrays with following values: `[checkbox_coords, contains_pixels, cropped_checkbox]`                    
+            - checkbox_coords - `numpy.ndarray` rectangle (x,y,width,height)
+            - contains_pixels - `bool`, True/False
+            - cropped_checkbox - `numpy.ndarray` of cropped checkbox image
+    """ # NOQA E501
+    # st group_size_range to (1, 1) to focus on single box groups only (checkboxes) # NOQA E501
+    config.group_size_range = (1, 1)
+
+    # get the image from str or numpy.ndarray
+    img = img_proc.get_image(img)
+
+    # try converting to grayscale
+    try:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    except Exception as e:
+        print("Warning: failed to convert to grayscale...")
+        print(e)
+
+    # run get_boxes function
+    rects, grouping_rects, image, output_image = get_boxes(
+        img, config=config, plot=plot)
+
+    # sets all the pixel values to either 0 or 255
+    # this function also inverts colors:
+    # - black pixels will become the background
+    # - white pixels will become the foreground
+    img = img_proc.apply_thresholding(img, plot)
+
+    # return an array of arrays containing a set of values for each checkbox:
+    # [checkbox_coords, contains_pixels, cropped_checkbox]
+    # - checkbox_coords - rectangle (x,y,width,height)
+    # - contains_pixels - bool, True/False
+    # - cropped_checkbox - numpy.ndarray of cropped checkbox image
+    return np.asarray([
+        [
+            rect,
+            img_proc.contains_pixels(
+                img_proc.get_checkbox_crop(img, rect), px_threshold),
+            img_proc.get_checkbox_crop(img, rect)
+        ]
+        for rect in grouping_rects])
+
+
 def get_boxes(img, config, plot=False):
     """
-    Single function to run a complicated pipeline to extract rectangular boxes locations from input image. 
+    Single function to run a complicated pipeline to extract rectangular boxes locations from input image.
     Short description of pipeline steps:
     - read image from a path or from `numpy.ndarray`
     - run an image processing iteration for every value provided in `config.scaling_factors` list:
@@ -40,13 +120,7 @@ def get_boxes(img, config, plot=False):
             src_image - same object that was passed in as `img` parameter
             output_image - `numpy.ndarray` representing source image with plotted boxes and grouped boxes
     """ # NOQA E501
-    assert(type(img) in [np.ndarray, str])
-    if type(img) is np.ndarray:
-        image_org = img.copy()
-        image_org = image_org.astype(np.uint8)
-    elif type(img) is str:
-        print("Processing file: ", img)
-        image_org = cv2.imread(img)
+    image_org = img_proc.get_image(img)
 
     ch = None
     if image_org.ndim == 3:
@@ -139,22 +213,27 @@ def get_boxes(img, config, plot=False):
         # to the global collection
         cnts_list += cnts
 
-    # filter gloal countours by rectangle WxH ratio
+    # filter global countours by rectangle WxH ratio
     cnts_list = rect_proc.filter_contours_by_wh_ratio(
         cnts_list, wh_ratio_range)
+
     # merge rectangles into group if overlapping
     rects = rect_proc.group_countours(cnts_list)
+
     mean_width = np.mean(rects[:, 2])
     # mean_height = np.mean(rects[:, 3])
+
     # group rectangles vertically (line by line)
     vertical_rect_groups = rect_proc.group_rects(
         rects, max_distance=vertical_max_distance,
         grouping_mode='vertical')
+
     # group rectangles horizontally (horizontally cluster nearby rects)
     rect_groups = rect_proc.get_groups_from_groups(
         vertical_rect_groups,
         max_distance=mean_width * horizontal_max_distance_multiplier,
         group_size_range=group_size_range, grouping_mode='horizontal')
+
     # get grouping rectangles
     grouping_rectangles = rect_proc.get_grouping_rectangles(rect_groups)
 
