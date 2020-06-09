@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 import cv2
 from boxdetect import config, pipelines
 
@@ -70,3 +71,23 @@ def test_get_boxes_fails(
     with pytest.raises(exp_exception):
         rects, grouping_rects, image, output_image = pipelines.get_boxes(
             inputs, config=cfg, plot=False)
+
+
+def test_get_checkboxes():
+    # get default config
+    cfg = DefaultConfig()
+
+    cfg.width_range = (40, 55)
+    cfg.height_range = (40, 55)
+    cfg.scaling_factors = [1.0]
+    cfg.wh_ratio_range = (0.8, 1.2)
+    cfg.dilation_iterations = 0
+
+    input_image = "tests/data/dummy_example.png"
+
+    checkboxes = pipelines.get_checkboxes(
+        input_image, config=cfg, plot=False)
+    # check if it recognized correct number of checkboxes as checked
+    assert(np.sum(checkboxes[:, 1]) == 7)
+    # check if specific checkboxes where recognized as checked/non checked
+    assert((checkboxes[:, 1][-3:] == [False, False, False]).all())
