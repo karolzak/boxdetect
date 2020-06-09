@@ -106,17 +106,17 @@ def test_filter_contours_by_area_size():
     assert((cnts == TEST_CNTS[0]).all())
 
 
-def test_filter_contours_by_rect_ratio():
+def test_filter_contours_by_wh_ratio():
     wh_ratio_range = (0.5, 1.0)
-    cnts = rect_proc.filter_contours_by_rect_ratio(
+    cnts = rect_proc.filter_contours_by_wh_ratio(
         TEST_CNTS_SCALED, wh_ratio_range)
     assert(len(cnts) == 1)
     assert((cnts == TEST_CNTS_SCALED[0]).all())
 
 
-def test_check_rect_ratio():
+def test_wh_ratio_in_range():
     wh_ratio_range = (0.5, 1.0)
-    is_rect = rect_proc.check_rect_ratio(TEST_CNTS_SCALED[0], wh_ratio_range)
+    is_rect = rect_proc.wh_ratio_in_range(TEST_CNTS_SCALED[0], wh_ratio_range)
     assert(is_rect is True)
 
 

@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import cv2
 from boxdetect import config, pipelines
 
