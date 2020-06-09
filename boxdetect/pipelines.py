@@ -140,7 +140,7 @@ def get_boxes(img, config, plot=False):
         cnts_list += cnts
 
     # filter gloal countours by rectangle WxH ratio
-    cnts_list = rect_proc.filter_contours_by_rect_ratio(
+    cnts_list = rect_proc.filter_contours_by_wh_ratio(
         cnts_list, wh_ratio_range)
     # merge rectangles into group if overlapping
     rects = rect_proc.group_countours(cnts_list)
