@@ -1,4 +1,4 @@
-![](https://github.com/karolzak/boxdetect/workflows/CI%build/badge.svg)
+![](https://github.com/karolzak/boxdetect/workflows/CI%20Build/badge.svg)
 
 **BoxDetect** is a Python package based on OpenCV which allows you to easily detect rectangular shapes like character or checkbox boxes on scanned forms.
 
