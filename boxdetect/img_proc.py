@@ -163,3 +163,87 @@ def draw_rects(image, rects, color=(0, 255, 0), thickness=1):
         x, y, w, h = r
         cv2.rectangle(image, (x, y), (x + w, y + h), color, thickness)
     return image
+
+
+def get_checkbox_crop(img, rect, border_crop_factor=0.15):
+    """
+    Takes in image as `numpy.ndarray` and rectangle to be cropped out and returns the cropped out image.
+
+    Args:
+        img (numpy.ndarray):
+            Image as numpy array.
+        rect (list, tuple or array):
+            Rectangle from OpenCV with following values: `(x, y, width, height)`
+        border_crop_factor (float, optional):
+            Defines how much from the image border should be removed during cropping.
+            This is used to remove any leftovers of checkbox frame.
+            Defaults to 0.15.
+
+    Returns:
+        numpy.ndarray:
+            Image crop as numpy array.
+    """ # NOQA E501
+    # collect base parameters of the crop
+    width = rect[2]
+    height = rect[3]
+    x1 = rect[0]
+    y1 = rect[1]
+    x2 = x1 + width
+    y2 = y1 + height
+
+    # calculate horizontal and vertical border to be cropped
+    w_pad = int(width * border_crop_factor)
+    h_pad = int(height * border_crop_factor)
+
+    # crop checkbox area from original image
+    im_crop = img[y1 + h_pad:y2 - h_pad, x1 + w_pad:x2 - w_pad]
+
+    return im_crop
+
+
+def contains_pixels(img, px_threshold=0.1):
+    """
+    Counts white pixels inside the input image and based on the `px_threshold` it estimates if there's enough white pixels present in the image. 
+    As this function sums pixel values you need to make sure that what you're passing as an input image is well preprocessed for that.
+
+    Args:
+        img (numpy.ndarray):
+            Image as numpy array.
+        px_threshold (float, optional):
+            This is the threshold used when estimating if pixels are present inside the checkbox.
+            Defaults to 0.1.
+
+    Returns:
+        bool:
+            True - if input image contains enough white pixels
+            False - if input image does not contain enough white pixels
+    """ # NOQA E501
+    # calculate maximum pixel values capacity
+    max_pix = img.shape[0] * img.shape[1] * img.max()
+    # divide sum of pixel values for the image by maximum pixel values capacity
+    # return True if calculated value is above the px_threshold,
+    # which means that enough pixels where detected in the image
+    # else it returns False
+    return True if np.sum(img) / max_pix >= px_threshold else False
+
+
+def get_image(img):
+    """
+    Helper function to take image either as `numpy.ndarray` or `str` and always return image as `numpy.ndarray`.
+
+    Args:
+        img (numpy.ndarray or str):
+            Image as numpy array or string file path.
+
+    Returns:
+        numpy.ndarray:
+            Image as `numpy.ndarray` with `dtype=np.uint8`
+    """ # NOQA E501
+    assert(type(img) in [np.ndarray, str])
+    if type(img) is np.ndarray:
+        image_org = img.copy()
+        image_org = image_org.astype(np.uint8)
+    elif type(img) is str:
+        print("Processing file: ", img)
+        image_org = cv2.imread(img)
+    return image_org
