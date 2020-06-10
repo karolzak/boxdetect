@@ -201,7 +201,7 @@ def get_checkbox_crop(img, rect, border_crop_factor=0.15):
     return im_crop
 
 
-def contains_pixels(img, px_threshold=0.1):
+def contains_pixels(img, px_threshold=0.1, verbose=False):
     """
     Counts white pixels inside the input image and based on the `px_threshold` it estimates if there's enough white pixels present in the image. 
     As this function sums pixel values you need to make sure that what you're passing as an input image is well preprocessed for that.
@@ -212,6 +212,9 @@ def contains_pixels(img, px_threshold=0.1):
         px_threshold (float, optional):
             This is the threshold used when estimating if pixels are present inside the checkbox.
             Defaults to 0.1.
+        verbose (bool, optional):
+            Defines if messages should be printed or not.
+            Defaults to False.
 
     Returns:
         bool:
@@ -219,12 +222,21 @@ def contains_pixels(img, px_threshold=0.1):
             False - if input image does not contain enough white pixels
     """ # NOQA E501
     # calculate maximum pixel values capacity
-    max_pix = img.shape[0] * img.shape[1] * img.max()
+    all_px_count = img.shape[0] * img.shape[1]
+    # all_px = img.shape[0] * img.shape[1] * img.max()
     # divide sum of pixel values for the image by maximum pixel values capacity
     # return True if calculated value is above the px_threshold,
     # which means that enough pixels where detected in the image
     # else it returns False
-    return True if np.sum(img) / max_pix >= px_threshold else False
+    nonzero_px_count = np.count_nonzero(img)
+    if verbose:
+        print("nonzero_px_count: ", nonzero_px_count)
+        print("all_px_count: ", all_px_count)
+        print(
+            "nonzero_px_count / all_px_count = ",
+            nonzero_px_count / all_px_count)
+    return True if nonzero_px_count / all_px_count >= px_threshold else False
+    # return True if np.sum(img) / all_px >= px_threshold and all_px != 0 else False  # NOQA E501
 
 
 def get_image(img):
