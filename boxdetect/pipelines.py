@@ -2,24 +2,26 @@ import cv2
 import imutils
 import numpy as np
 
-from . import rect_proc, img_proc
+from . import rect_proc, img_proc, config
 
 
-def get_checkboxes(img, config, px_threshold=0.1, plot=False):
+def get_checkboxes(
+        img, cfg: config.PipelinesCfg,
+        px_threshold=0.1, plot=False, verbose=False):
     """    
     Pipeline function to extract checkboxes locations from input image along with an estimation if pixels are present inside that checkbox.
     Short description of pipeline steps:
     - read image from a path or from `numpy.ndarray`
-    - run an image processing iteration for every value provided in `config.scaling_factors` list:
+    - run an image processing iteration for every value provided in `cfg.scaling_factors` list:
         - resize image based on `scaling_factor`
         - try convert to grayscale
         - apply otsu thresholding
-        - run dilation based on `config` params. If `config.dilation_iterations=0` this step will be skipped
-        - process image with morphological transformations to extract rectangular shapes based on `config` params
-        - get contours from transformed images and filter them based on area size and `config.wh_ratio_range`
+        - run dilation based on `cfg` params. If `cfg.dilation_iterations=0` this step will be skipped
+        - process image with morphological transformations to extract rectangular shapes based on `cfg` params
+        - get contours from transformed images and filter them based on area size and `cfg.wh_ratio_range`
     - aggregate contours from all the iterations and merge overlapping countours
     - convert contours to rectangles `(x, y, width, height)`
-    - group rectangles first vertically and then horizontally based on `config.vertical_max_distance` and `config.horizontal_max_distance_multiplier`
+    - group rectangles first vertically and then horizontally based on `cfg.vertical_max_distance` and `cfg.horizontal_max_distance_multiplier`
     - extract groups of boxes which have only a single box inside (checkboxes)
     - run estimation function to determine if checkbox contains pixels (naive approach for checking if it's checked)
     - return an array of arrays with following information for each detected checkbox: `[checkbox_coords, contains_pixels, cropped_checkbox]`                    
@@ -31,13 +33,16 @@ def get_checkboxes(img, config, px_threshold=0.1, plot=False):
         img (str or numpy.ndarray):
             Input image. Can be passed in either as
             `string` (filepath) or as `numpy.ndarray` represting an image
-        config (boxdetect.config object):
+        cfg (boxdetect.config object):
             Object holding all the necessary settings to run this pipeline
         px_threshold (float, optional):
             This is the threshold used when estimating if pixels are present inside the checkbox.
             Defaults to 0.1.
         plot (bool, optional):
             Display different stages of image being processed.
+            Defaults to False.
+        verbose (bool, optional):
+            Defines if messages should be printed or not.
             Defaults to False.
 
     Returns:
@@ -48,7 +53,7 @@ def get_checkboxes(img, config, px_threshold=0.1, plot=False):
             - cropped_checkbox - `numpy.ndarray` of cropped checkbox image
     """ # NOQA E501
     # st group_size_range to (1, 1) to focus on single box groups only (checkboxes) # NOQA E501
-    config.group_size_range = (1, 1)
+    cfg.group_size_range = (1, 1)
 
     # get the image from str or numpy.ndarray
     img = img_proc.get_image(img)
@@ -56,13 +61,13 @@ def get_checkboxes(img, config, px_threshold=0.1, plot=False):
     # try converting to grayscale
     try:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    except Exception as e:
-        print("Warning: failed to convert to grayscale...")
-        print(e)
+    except Exception:
+        pass
+        # print("WARNING: Failed to convert to grayscale... skipping")
 
     # run get_boxes function
     rects, grouping_rects, image, output_image = get_boxes(
-        img, config=config, plot=plot)
+        img, cfg=cfg, plot=plot)
 
     # sets all the pixel values to either 0 or 255
     # this function also inverts colors:
@@ -79,27 +84,28 @@ def get_checkboxes(img, config, px_threshold=0.1, plot=False):
         [
             rect,
             img_proc.contains_pixels(
-                img_proc.get_checkbox_crop(img, rect), px_threshold),
+                img_proc.get_checkbox_crop(
+                    img, rect), px_threshold, verbose=verbose),
             img_proc.get_checkbox_crop(img, rect)
         ]
         for rect in grouping_rects])
 
 
-def get_boxes(img, config, plot=False):
+def get_boxes(img, cfg: config.PipelinesCfg, plot=False):
     """
     Single function to run a complicated pipeline to extract rectangular boxes locations from input image.
     Short description of pipeline steps:
     - read image from a path or from `numpy.ndarray`
-    - run an image processing iteration for every value provided in `config.scaling_factors` list:
+    - run an image processing iteration for every value provided in `cfg.scaling_factors` list:
         - resize image based on `scaling_factor`
         - try convert to grayscale
         - apply otsu thresholding
-        - run dilation based on `config` params. If `config.dilation_iterations=0` this step will be skipped
-        - process image with morphological transformations to extract rectangular shapes based on `config` params
-        - get contours from transformed images and filter them based on area size and `config.wh_ratio_range`
+        - run dilation based on `cfg` params. If `cfg.dilation_iterations=0` this step will be skipped
+        - process image with morphological transformations to extract rectangular shapes based on `cfg` params
+        - get contours from transformed images and filter them based on area size and `cfg.wh_ratio_range`
     - aggregate contours from all the iterations and merge overlapping countours
     - convert contours to rectangles `(x, y, width, height)`
-    - group rectangles first vertically and then horizontally based on `config.vertical_max_distance` and `config.horizontal_max_distance_multiplier`
+    - group rectangles first vertically and then horizontally based on `cfg.vertical_max_distance` and `cfg.horizontal_max_distance_multiplier`
     - draw rectangles and grouped rectangles on original image
     - return rects, grouped_rects, input, output_image
 
@@ -107,7 +113,7 @@ def get_boxes(img, config, plot=False):
         img (str or numpy.ndarray):
             Input image. Can be passed in either as
             `string` (filepath) or as `numpy.ndarray` represting an image
-        config (boxdetect.config object):
+        cfg (boxdetect.config object):
             Object holding all the necessary settings to run this pipeline
         plot (bool, optional):
             Display different stages of image being processed.
@@ -129,19 +135,19 @@ def get_boxes(img, config, plot=False):
         ch = 1
 
     # parameters
-    width_range = config.width_range
-    height_range = config.height_range
-    wh_ratio_range = config.wh_ratio_range
-    border_thickness = config.border_thickness
-    thickness = config.thickness
-    scaling_factors = config.scaling_factors
+    width_range = cfg.width_range
+    height_range = cfg.height_range
+    wh_ratio_range = cfg.wh_ratio_range
+    border_thickness = cfg.border_thickness
+    thickness = cfg.thickness
+    scaling_factors = cfg.scaling_factors
 
-    dilation_kernel = config.dilation_kernel
-    dilation_iterations = config.dilation_iterations
+    dilation_kernel = cfg.dilation_kernel
+    dilation_iterations = cfg.dilation_iterations
 
-    group_size_range = config.group_size_range
-    vertical_max_distance = config.vertical_max_distance
-    horizontal_max_distance_multiplier = config.horizontal_max_distance_multiplier  # NOQA E501
+    group_size_range = cfg.group_size_range
+    vertical_max_distance = cfg.vertical_max_distance
+    horizontal_max_distance_multiplier = cfg.horizontal_max_distance_multiplier  # NOQA E501
 
     # process image using range of scaling factors
     cnts_list = []
@@ -166,9 +172,9 @@ def get_boxes(img, config, plot=False):
         # convert the resized image to grayscale
         try:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        except Exception as e:
-            print("Warning: failed to convert to grayscale...")
-            print(e)
+        except Exception:
+            pass
+            # print("WARNING: Failed to convert to grayscale... skipping")
 
         # apply tresholding to get all the pixel values to either 0 or 255
         # this function also inverts colors
