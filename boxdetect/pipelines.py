@@ -6,7 +6,7 @@ from . import rect_proc, img_proc, config
 
 
 def get_checkboxes(
-        img, cfg: config.PipelinesCfg,
+        img, cfg: config.PipelinesConfig,
         px_threshold=0.1, plot=False, verbose=False):
     """    
     Pipeline function to extract checkboxes locations from input image along with an estimation if pixels are present inside that checkbox.
@@ -91,7 +91,7 @@ def get_checkboxes(
         for rect in grouping_rects])
 
 
-def get_boxes(img, cfg: config.PipelinesCfg, plot=False):
+def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     """
     Single function to run a complicated pipeline to extract rectangular boxes locations from input image.
     Short description of pipeline steps:

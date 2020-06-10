@@ -1,4 +1,4 @@
-class PipelinesCfg:
+class PipelinesConfig:
     # Important to adjust these values to match the size of boxes on your image
     width_range = (40, 50)
     height_range = (50, 60)

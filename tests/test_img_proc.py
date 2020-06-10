@@ -7,7 +7,7 @@ from boxdetect import config, img_proc
 
 
 def DefaultConfig():
-    cfg = config.PipelinesCfg()
+    cfg = config.PipelinesConfig()
     cfg.width_range = (25, 50)
     cfg.height_range = (25, 50)
     cfg.scaling_factors = [2.0]
