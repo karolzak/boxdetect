@@ -5,13 +5,14 @@ from boxdetect import config, pipelines
 
 
 def DefaultConfig():
-    config.width_range = (25, 50)
-    config.height_range = (25, 50)
-    config.scaling_factors = [2.0]
-    config.wh_ratio_range = (0.5, 1.5)
-    config.group_size_range = (1, 100)
-    config.dilation_iterations = 0
-    return config
+    cfg = config.PipelinesCfg()
+    cfg.width_range = (25, 50)
+    cfg.height_range = (25, 50)
+    cfg.scaling_factors = [2.0]
+    cfg.wh_ratio_range = (0.5, 1.5)
+    cfg.group_size_range = (1, 100)
+    cfg.dilation_iterations = 0
+    return cfg
 
 
 def OpenTestImage(file_path):
@@ -54,7 +55,7 @@ def test_get_boxes(
     cfg.group_size_range = group_size_range
 
     rects, grouping_rects, image, output_image = pipelines.get_boxes(
-        img, config=cfg, plot=False)
+        img, cfg=cfg, plot=False)
     assert(len(rects) == exp_rects_count)
     assert(len(grouping_rects) == exp_groups_count)
 
@@ -70,7 +71,7 @@ def test_get_boxes_fails(
     cfg.group_size_range = group_size_range
     with pytest.raises(exp_exception):
         rects, grouping_rects, image, output_image = pipelines.get_boxes(
-            inputs, config=cfg, plot=False)
+            inputs, cfg=cfg, plot=False)
 
 
 def test_get_checkboxes():
@@ -86,7 +87,7 @@ def test_get_checkboxes():
     input_image = "tests/data/dummy_example.png"
 
     checkboxes = pipelines.get_checkboxes(
-        input_image, config=cfg, plot=False)
+        input_image, cfg=cfg, plot=False)
     # check if it recognized correct number of checkboxes as checked
     assert(np.sum(checkboxes[:, 1]) == 7)
     # check if specific checkboxes where recognized as checked/non checked

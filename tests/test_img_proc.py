@@ -7,13 +7,14 @@ from boxdetect import config, img_proc
 
 
 def DefaultConfig():
-    config.width_range = (25, 50)
-    config.height_range = (25, 50)
-    config.scaling_factors = [2.0]
-    config.wh_ratio_range = (0.5, 1.5)
-    config.group_size_range = (1, 100)
-    config.dilation_iterations = 0
-    return config
+    cfg = config.PipelinesCfg()
+    cfg.width_range = (25, 50)
+    cfg.height_range = (25, 50)
+    cfg.scaling_factors = [2.0]
+    cfg.wh_ratio_range = (0.5, 1.5)
+    cfg.group_size_range = (1, 100)
+    cfg.dilation_iterations = 0
+    return cfg
 
 
 IMG1 = cv2.imread("tests/data/tests_color_enhance1.png")
