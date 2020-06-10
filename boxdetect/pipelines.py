@@ -147,7 +147,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
 
     group_size_range = cfg.group_size_range
     vertical_max_distance = cfg.vertical_max_distance
-    horizontal_max_distance_multiplier = cfg.horizontal_max_distance_multiplier  # NOQA E501
+    horizontal_max_distance = cfg.horizontal_max_distance  # NOQA E501
 
     # process image using range of scaling factors
     cnts_list = []
@@ -166,8 +166,8 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         max_h = int(height_range[1] * resize_ratio_inv)
 
         area_range = (
-            round(min_w * min_h * 1.00),
-            round(max_w * max_h * 1.00)
+            round(min_w * min_h * 0.90),
+            round(max_w * max_h * 1.10)
         )
         # convert the resized image to grayscale
         try:
@@ -190,22 +190,20 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
             cv2.imshow("dilated", image)
             cv2.waitKey(0)
 
-        # creating line-shape kernels to be used for image enhancing step
-        # try it out only in case of very poor results with previous setup
-        # kernels = get_line_kernels(length=4)
-        # image = img_proc.apply_merge_transformations(
-        #     image, kernels, plot=plot,
-        #     transformations=[
-        #         (cv2.MORPH_CLOSE, 2),
-        #         (cv2.MORPH_OPEN, 2)
-        #     ])
+        if cfg.morph_kernels_type == 'rectangles':
+            # creating rectangular-shape kernels to be used for
+            # extracting rectangular shapes
+            kernels = img_proc.get_rect_kernels(
+                width_range=(min_w, max_w), height_range=(min_h, max_h),
+                wh_ratio_range=wh_ratio_range,
+                border_thickness=border_thickness)
+        elif cfg.morph_kernels_type == 'lines':
+            # creating line-shape kernels to be used for image enhancing step
+            # try it out only in case of very poor results with previous setup
+            kernels = img_proc.get_line_kernels(
+                length=cfg.morph_kernels_lines_length,
+                thickness=cfg.morph_kernels_lines_thickness)
 
-        # creating rectangular-shape kernels to be used for
-        # extracting rectangular shapes
-        kernels = img_proc.get_rect_kernels(
-            width_range=(min_w, max_w), height_range=(min_h, max_h),
-            wh_ratio_range=wh_ratio_range,
-            border_thickness=border_thickness)
         image = img_proc.apply_merge_transformations(
             image, kernels, plot=plot)
 
@@ -219,6 +217,9 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         # to the global collection
         cnts_list += cnts
 
+    cnts_list = rect_proc.filter_contours_by_size_range(
+        cnts_list, width_range, height_range)
+
     # filter global countours by rectangle WxH ratio
     cnts_list = rect_proc.filter_contours_by_wh_ratio(
         cnts_list, wh_ratio_range)
@@ -226,7 +227,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     # merge rectangles into group if overlapping
     rects = rect_proc.group_countours(cnts_list)
 
-    mean_width = np.mean(rects[:, 2])
+    # mean_width = np.mean(rects[:, 2])
     # mean_height = np.mean(rects[:, 3])
 
     # group rectangles vertically (line by line)
@@ -237,7 +238,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     # group rectangles horizontally (horizontally cluster nearby rects)
     rect_groups = rect_proc.get_groups_from_groups(
         vertical_rect_groups,
-        max_distance=mean_width * horizontal_max_distance_multiplier,
+        max_distance=horizontal_max_distance,
         group_size_range=group_size_range, grouping_mode='horizontal')
 
     # get grouping rectangles
