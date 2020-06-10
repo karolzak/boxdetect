@@ -8,10 +8,11 @@ def DefaultConfig():
     cfg = config.PipelinesConfig()
     cfg.width_range = (25, 50)
     cfg.height_range = (25, 50)
-    cfg.scaling_factors = [2.0]
+    cfg.scaling_factors = [1.0]
     cfg.wh_ratio_range = (0.5, 1.5)
     cfg.group_size_range = (1, 100)
     cfg.dilation_iterations = 0
+    cfg.morph_kernels_type = 'rectangles'
     return cfg
 
 
