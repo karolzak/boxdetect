@@ -122,7 +122,7 @@ def test_wh_ratio_in_range():
 
 def test_group_countours():
     test_cnts = [TEST_CNTS_SCALED[0], TEST_CNTS_SCALED[0]]
-    rects = rect_proc.group_countours(test_cnts, overlap_threshold=0.5)
+    rects = rect_proc.group_countours(test_cnts, epsilon=0.1)
     assert((rects == [[374,  74,  32,  32]]).all())
 
 

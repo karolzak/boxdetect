@@ -3,16 +3,16 @@ import numpy as np
 import imutils
 
 
-def group_countours(cnts, overlap_threshold=0.5):
+def group_countours(cnts, epsilon=0.1):
     """
-    Merge multiple contours into a single bounding rectangle using `overlap_threshold`
+    Merge multiple contours into a single bounding rectangle using `epsilon`
 
     Args:
         cnts (list of contours):
             List of countours to be merged.
-        overlap_threshold (float, optional):
-            Threshold deciding if two contours are close enough to each other to merge them together.
-            Defaults to 0.5.
+        epsilon (float, optional):
+            Value deciding if two contours are close enough to each other to merge them together.
+            Defaults to 0.1.
 
     Returns:
         list of rectangles:
@@ -21,7 +21,7 @@ def group_countours(cnts, overlap_threshold=0.5):
     rects = [get_bounding_rect(c)[:4] for c in cnts]
     # we need to duplicate all the rects for grouping below to work
     rects += rects
-    rects, weights = cv2.groupRectangles(rects, 1, overlap_threshold)
+    rects, weights = cv2.groupRectangles(rects, 1, epsilon)
     return rects
 
 
