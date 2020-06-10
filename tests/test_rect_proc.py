@@ -139,3 +139,34 @@ def test_rescale_contours():
     cnts = rect_proc.rescale_contours(TEST_CNTS, resize_ratio)
     for x, y in zip(cnts, TEST_CNTS_SCALED):
         assert((y == x).all())
+
+
+def test_filter_contours_by_size_range():
+    results = rect_proc.filter_contours_by_size_range(
+        TEST_CNTS_SCALED, width_range=None, height_range=None)
+    assert(results == TEST_CNTS_SCALED)
+    results = rect_proc.filter_contours_by_size_range(
+        CNTS1, width_range=(13, 20), height_range=(13, 20))
+    assert(len(results) == 10)
+    results = rect_proc.filter_contours_by_size_range(
+        CNTS1, width_range=(130, 140))
+    assert(len(results) == 1)
+
+
+def test_size_in_range():
+    c = TEST_CNTS_SCALED[0]
+    result = rect_proc.size_in_range(
+        c, width_range=None, height_range=None)
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, width_range=(10, 10), height_range=None)
+    assert(not result)
+    result = rect_proc.size_in_range(
+        c, width_range=(30, 35), height_range=None)
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, height_range=(30, 35))
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, width_range=(30, 35), height_range=(30, 35))
+    assert(result)
