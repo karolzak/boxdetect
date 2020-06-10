@@ -45,6 +45,28 @@ def get_bounding_rect(c):
     return x, y, w, h, False
 
 
+def filter_contours_by_size_range(cnts, width_range=None, height_range=None):
+    return [
+        c for c in cnts
+        if size_in_range(c, width_range, height_range)
+    ]
+
+
+def size_in_range(c, width_range=None, height_range=None):
+    (x, y, w, h, is_rect) = get_bounding_rect(c)
+    if width_range:
+        if w >= width_range[0] and w <= width_range[1]:
+            pass
+        else:
+            return False
+    if height_range:
+        if h >= height_range[0] and h <= height_range[1]:
+            pass
+        else:
+            return False
+    return True
+
+
 def wh_ratio_in_range(c, wh_ratio_range):
     """
     Performs 2 checks:
