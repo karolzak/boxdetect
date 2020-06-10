@@ -155,7 +155,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         # resize the image for processing time
         image = image_org.copy()
         image = imutils.resize(
-            image, width=int(image.shape[0] * scaling_factor))
+            image, width=int(image.shape[1] * scaling_factor))
 
         resize_ratio = image_org.shape[0] / image.shape[0]
         resize_ratio_inv = image.shape[0] / image_org.shape[0]
