@@ -230,11 +230,13 @@ def contains_pixels(img, px_threshold=0.1, verbose=False):
     # else it returns False
     nonzero_px_count = np.count_nonzero(img)
     if verbose:
+        print("----------------------------------")
         print("nonzero_px_count: ", nonzero_px_count)
         print("all_px_count: ", all_px_count)
         print(
             "nonzero_px_count / all_px_count = ",
             nonzero_px_count / all_px_count)
+        print("----------------------------------")
     return True if nonzero_px_count / all_px_count >= px_threshold else False
     # return True if np.sum(img) / all_px >= px_threshold and all_px != 0 else False  # NOQA E501
 
