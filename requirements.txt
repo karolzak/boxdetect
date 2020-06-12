@@ -2,3 +2,4 @@ numpy
 opencv-python
 imutils
 bump2version
+pyyaml
