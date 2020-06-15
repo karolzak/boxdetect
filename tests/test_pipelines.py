@@ -1,6 +1,9 @@
 import pytest
 import numpy as np
 import cv2
+import sys
+sys.path.append(".")
+sys.path.append("../.")
 from boxdetect import config, pipelines
 
 
@@ -73,6 +76,20 @@ def test_get_boxes_fails(
     with pytest.raises(exp_exception):
         rects, grouping_rects, image, output_image = pipelines.get_boxes(
             inputs, cfg=cfg, plot=False)
+
+
+def test_no_rectangles_found():
+    # get default config
+    cfg = DefaultConfig()
+
+    input_image = np.ones((1000, 1000, 3), dtype=np.uint8)
+
+    checkboxes = pipelines.get_boxes(
+        input_image, cfg=cfg, plot=False)
+    # check if it recognized correct number of checkboxes as checked
+    assert(np.sum(checkboxes[:, 1]) == 7)
+    # check if specific checkboxes where recognized as checked/non checked
+    assert((checkboxes[:, 1][-3:] == [False, False, False]).all())
 
 
 def test_get_checkboxes():

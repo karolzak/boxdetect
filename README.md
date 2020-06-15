@@ -1,10 +1,10 @@
 [![CI Build](https://github.com/karolzak/boxdetect/workflows/CI%20Build/badge.svg)](https://github.com/karolzak/boxdetect/actions?query=workflow%3A%22CI+Build%22)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/karolzak/boxdetect/blob/master/LICENSE)
+[![PyPI - Version](https://img.shields.io/pypi/v/boxdetect.svg "PyPI version")](https://pypi.org/project/boxdetect/) 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/boxdetect)](https://pypi.org/project/boxdetect/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/boxdetect)](https://pypi.org/project/boxdetect/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/karolzak/boxdetect/blob/master/LICENSE)
 
-Share:
-
+**Share:**  
 [![Twitter URL](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2karolzak%2Fboxdetect)](http://twitter.com/share?text=Check%20out%20BoxDetect%20Python%20package%20which%20helps%20you%20extract%20rectangular%20boxes%20from%20images&url=https://github.com/karolzak/boxdetect/&hashtags=python,computervision,boxesdetection,shapesdetection,opencv)
 <!-- [![LinkedIn URL]()](http://www.linkedin.com/shareArticle?mini=true&url=https://github.com/karolzak/boxdetect&title=Boxdetect%20python%20package) -->
 
