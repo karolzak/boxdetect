@@ -82,7 +82,7 @@ def test_no_rectangles_found(capsys):
     # get default config
     cfg = DefaultConfig()
 
-    input_image = np.ones((1000, 1000, 3), dtype=np.uint8)
+    input_image = np.ones((100, 100, 3), dtype=np.uint8)
     rects, grouping_rects, image, output_image = pipelines.get_boxes(
         input_image, cfg=cfg, plot=False)
     captured = capsys.readouterr()
