@@ -275,6 +275,9 @@ def group_rects(
     elif grouping_mode == 'horizontal':
         m, n = (0, 2)
 
+    if len(rects) == 0:
+        return []
+
     rects_sorted = rects[np.argsort(rects[:, m])]
     new_groups = []
     temp_group = []

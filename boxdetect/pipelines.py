@@ -258,4 +258,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         cv2.imshow("Org image with boxes", image_org)
         cv2.waitKey(0)
 
+    if len(rects) == 0:
+        print("WARNING: No rectangles were found in the input image.")
+
     return rects, grouping_rectangles, img, image_org
