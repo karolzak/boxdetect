@@ -3,3 +3,5 @@ opencv-python
 imutils
 bump2version
 pyyaml
+pytest
+pytest-cov
