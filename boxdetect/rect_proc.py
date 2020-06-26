@@ -46,6 +46,25 @@ def get_bounding_rect(c):
 
 
 def filter_contours_by_size_range(cnts, width_range=None, height_range=None):
+    """  # NOQA E501
+    Filters the input list of contours and removes all the contours for which size is outside of provided `width_range` and/or `height_range`.
+
+    Args:
+        cnts (list of numpy.ndarray):
+            List of contours (numpy.ndarray)
+        width_range (tuple of ints, optional):
+            Tuple of integers like: (min_width, max_width).
+            If set to `None` - width won't be taken into account.
+            Defaults to None.
+        height_range (tuple of ints, optional):
+            Tuple of integers like: (min_height, max_height).
+            If set to `None` - height won't be taken into account.
+            Defaults to None.
+
+    Returns:
+        list of numpy.ndarray:
+            List of filtered contours (numpy.ndarray)
+    """
     return [
         c for c in cnts
         if size_in_range(c, width_range, height_range)
@@ -53,6 +72,26 @@ def filter_contours_by_size_range(cnts, width_range=None, height_range=None):
 
 
 def size_in_range(c, width_range=None, height_range=None):
+    """  # NOQA E501
+    Returns `bool` indicating if given contour object is within a specific range of height and/or width.
+
+    Args:
+        c (numpy.ndarray):
+            Contour object.
+        width_range (tuple of ints, optional):
+            Tuple of integers like: (min_width, max_width).
+            If set to `None` - width won't be taken into account.
+            Defaults to None.
+        height_range (tuple of ints, optional):
+            Tuple of integers like: (min_height, max_height).
+            If set to `None` - height won't be taken into account.
+            Defaults to None.
+
+    Returns:
+        bool:
+            `True` if contour size is in provided ranges of width and height.
+            `False` if it's not.
+    """
     (x, y, w, h, is_rect) = get_bounding_rect(c)
     if width_range:
         if w >= width_range[0] and w <= width_range[1]:
@@ -76,10 +115,10 @@ def wh_ratio_in_range(c, wh_ratio_range):
 
     Args:
         c (numpy.ndarray):
-        Contour object. More about contours in OpenCV: https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
+            Contour object. More about contours in OpenCV: https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
         wh_ratio_range (tuple):
-        Tuple of ints like `(0.5, 1.5)` representing minimum and maximum value of rectangles width / height ratio.
-        If given rectangle won't make it inside the range, function will return `False`.
+            Tuple of ints like `(0.5, 1.5)` representing minimum and maximum value of rectangles width / height ratio.
+            If given rectangle won't make it inside the range, function will return `False`.
 
     Returns:
         bool:
@@ -215,7 +254,7 @@ def get_groups_from_groups(
     Args:
         list_of_groups (list of rectangles lists):
             Example structure: `[ [[x,y,w,h],[x,y,w,h]], [[x,y,w,h],[x,y,w,h]] ]`
-        max_distance ([type]):
+        max_distance (int):
             Max distance between two boxes (rectangles) to be considered the same group
         group_size_range (tuple):
             Tuple of ints like `(1, 100)` defining the minimum and maximum size of the groups to be created.
@@ -255,7 +294,7 @@ def group_rects(
     Args:
         rects (list of rectangles):
             List of rectangles (x,y,width,height).
-        max_distance ([type]):
+        max_distance (int):
             Max distance between two boxes (rectangles) to be considered the same group
         group_size_range (tuple, optional):
             Tuple of ints like `(1, 100)` defining the minimum and maximum size of the groups to be created.

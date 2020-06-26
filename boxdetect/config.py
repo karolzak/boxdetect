@@ -3,6 +3,15 @@ import yaml
 
 class PipelinesConfig:
     def __init__(self, yaml_path=None):
+        """  # NOQA E501
+        Helper class to keep all the important config variables in a single place.
+        Use `save_` / `load_` functions to store configs in files and load when necessary.
+
+        Args:
+            yaml_path (str, optional): 
+                If provided it will try to first load default values for the config and
+                then load a saved configuration from a `yaml` file. Defaults to None.
+        """
         # Important to adjust these values to match the size of boxes on your image  # NOQA E501
         self.width_range = (40, 50)
         self.height_range = (50, 60)
@@ -33,15 +42,19 @@ class PipelinesConfig:
         # Rectangles grouping
         self.group_size_range = (1, 100)  # minimum number of rectangles in a group, >2 - will ignore groups with single rect  # NOQA E501
         self.vertical_max_distance = 10  # in pixels
-        # Multiplier to be used with mean width of all the rectangles detected
-        # E.g. for multiplier of 4 the maximum distance between boxes to be grouped together will be:  # NOQA E501
-        # max_horizontal_distance = np.mean(all_rect_widths) * 3
         self.horizontal_max_distance = self.width_range[0] * 2
 
         if yaml_path:
             self.load_yaml(yaml_path)
 
     def save_yaml(self, path):
+        """
+        Saves current config into `yaml` file based on provided `path`.
+
+        Args:
+            path (str):
+                Path to the file to save config.
+        """
         variables_dict = {
             key: value
             for key, value in self.__dict__.items()
@@ -51,10 +64,20 @@ class PipelinesConfig:
             yaml.dump(variables_dict, file)
 
     def load_yaml(self, path, suppress_warnings=False):
+        """
+        Loads configuration from `yaml` file based on provided `path`.
+
+        Args:
+            path (str):
+                Path to the file to load config from.
+            suppress_warnings (bool, optional):
+                To show or not show warnings about potential mismatches.
+                Defaults to False.
+        """
         with open(r'%s' % path, 'r') as file:
             variables_dict = yaml.load(file, Loader=yaml.FullLoader)
 
         for key, value in variables_dict.items():
-            if not suppress_warnings and not key in self.__dict__.keys():
+            if not suppress_warnings and key not in self.__dict__.keys():
                 print("WARNING: Loaded variable '%s' which was not previously present in the config." % key)  # NOQA E501
             setattr(self, key, value)
