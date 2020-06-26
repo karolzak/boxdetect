@@ -38,7 +38,7 @@ def apply_merge_transformations(
     image = new_image
     image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)[1]
 
-    if plot:
+    if plot:  # pragma: no cover
         cv2.imshow("rectangular shape enhanced image", image)
         cv2.waitKey(0)
 
@@ -68,7 +68,7 @@ def apply_thresholding(image, plot=False):
 
     image = otsu + binary
 
-    if plot:
+    if plot:  # pragma: no cover
         cv2.imshow("thresholded image", image)
         cv2.waitKey(0)
 
@@ -229,7 +229,7 @@ def contains_pixels(img, px_threshold=0.1, verbose=False):
     # which means that enough pixels where detected in the image
     # else it returns False
     nonzero_px_count = np.count_nonzero(img)
-    if verbose:
+    if verbose:  # pragma: no cover
         print("----------------------------------")
         print("nonzero_px_count: ", nonzero_px_count)
         print("all_px_count: ", all_px_count)

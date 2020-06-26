@@ -63,19 +63,23 @@ def test_get_boxes(
     assert(len(rects) == exp_rects_count)
     assert(len(grouping_rects) == exp_groups_count)
 
+    cfg.morph_kernels_type = 'lines'
+    cfg.morph_kernels_lines_length = 30
+    cfg.morph_kernels_lines_thickness = 1
+    rects, grouping_rects, image, output_image = pipelines.get_boxes(
+        img, cfg=cfg, plot=False)
+    assert(len(rects) == exp_rects_count)
+    assert(len(grouping_rects) == exp_groups_count)
 
-@pytest.mark.parametrize(
-    "inputs, group_size_range, exp_rects, exp_groups, exp_exception",
-    GET_BOXES_FAILS_TEST_DATA)
-def test_get_boxes_fails(
-        inputs, group_size_range, exp_rects, exp_groups, exp_exception):
+
+def test_get_boxes_fails():
     # get default config
     cfg = DefaultConfig()
 
-    cfg.group_size_range = group_size_range
-    with pytest.raises(exp_exception):
+    # cfg.group_size_range = group_size_range
+    with pytest.raises(AttributeError):
         rects, grouping_rects, image, output_image = pipelines.get_boxes(
-            inputs, cfg=cfg, plot=False)
+            "", cfg=cfg, plot=False)
 
 
 def test_no_rectangles_found(capsys):
@@ -117,6 +121,15 @@ def test_get_checkboxes():
     assert((checkboxes[:, 1][-3:] == [False, False, False]).all())
 
     input_image = OpenTestImage("tests/data/dummy_example.png")
+
+    checkboxes = pipelines.get_checkboxes(
+        input_image, cfg=cfg, plot=False)
+    # check if it recognized correct number of checkboxes as checked
+    assert(np.sum(checkboxes[:, 1]) == 7)
+    # check if specific checkboxes where recognized as checked/non checked
+    assert((checkboxes[:, 1][-3:] == [False, False, False]).all())
+
+    input_image = GetGrayscaleFromPath("tests/data/dummy_example.png")
 
     checkboxes = pipelines.get_checkboxes(
         input_image, cfg=cfg, plot=False)

@@ -186,7 +186,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
             cv2.MORPH_RECT, dilation_kernel)
         image = cv2.dilate(
             image, kernel, iterations=dilation_iterations)
-        if plot:
+        if plot:  # pragma: no cover
             cv2.imshow("dilated", image)
             cv2.waitKey(0)
 
@@ -254,7 +254,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     image_org = img_proc.draw_rects(
         image_org, grouping_rectangles, color=(255, 0, 0), thickness=thickness)
 
-    if plot:
+    if plot:  # pragma: no cover
         cv2.imshow("Org image with boxes", image_org)
         cv2.waitKey(0)
 
