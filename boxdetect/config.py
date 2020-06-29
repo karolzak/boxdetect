@@ -13,11 +13,11 @@ class PipelinesConfig:
                 then load a saved configuration from a `yaml` file. Defaults to None.
         """
         # Important to adjust these values to match the size of boxes on your image  # NOQA E501
-        self.width_range = (40, 50)
-        self.height_range = (50, 60)
+        self.width_range = [(40, 50)]
+        self.height_range = [(50, 60)]
 
         # w/h ratio range for boxes/rectangles filtering
-        self.wh_ratio_range = (0.65, 0.1)
+        self.wh_ratio_range = [(0.65, 0.1)]
 
         # The more scaling factors the more accurate the results
         # but also it takes more time to processing.
@@ -29,23 +29,38 @@ class PipelinesConfig:
         self.thickness = 2
 
         # Image processing
-        self.dilation_kernel = (2, 2)
+        self.dilation_kernel = [(2, 2)]
         # Num of iterations when running dilation tranformation (to engance the image)  # NOQA E501
-        self.dilation_iterations = 0
+        self.dilation_iterations = [0]
 
-        self.morph_kernels_type = 'lines'  # 'rectangles'
-        self.morph_kernels_lines_length = 15
-        self.morph_kernels_lines_thickness = 1
+        self.morph_kernels_type = ['lines']  # 'rectangles'
+        self.morph_kernels_lines_length = [15]
+        self.morph_kernels_lines_thickness = [1]
         # Rectangular kernels border thickness
-        self.border_thickness = 1
+        self.border_thickness = [1]
 
         # Rectangles grouping
         self.group_size_range = (1, 100)  # minimum number of rectangles in a group, >2 - will ignore groups with single rect  # NOQA E501
-        self.vertical_max_distance = 10  # in pixels
-        self.horizontal_max_distance = self.width_range[0] * 2
+        self.vertical_max_distance = [10]  # in pixels
+        self.horizontal_max_distance = [self.width_range[0][0] * 2]
 
         if yaml_path:
             self.load_yaml(yaml_path)
+
+        self.update_num_iterations()
+
+    def update_num_iterations(self):
+        self.num_iterations = 1
+        for variable in [
+            self.width_range, self.height_range, self.wh_ratio_range,
+            self.dilation_kernel, self.border_thickness,
+            self.dilation_iterations, self.morph_kernels_type,
+            self.morph_kernels_lines_length, self.horizontal_max_distance,
+            self.morph_kernels_lines_thickness, self.vertical_max_distance
+        ]:
+            if type(variable) is not list:
+                variable = [variable]
+            self.num_iterations = len(variable) if self.num_iterations < len(variable) else self.num_iterations
 
     def save_yaml(self, path):
         """
@@ -81,3 +96,5 @@ class PipelinesConfig:
             if not suppress_warnings and key not in self.__dict__.keys():
                 print("WARNING: Loaded variable '%s' which was not previously present in the config." % key)  # NOQA E501
             setattr(self, key, value)
+
+        self.update_num_iterations()

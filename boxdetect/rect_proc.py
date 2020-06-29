@@ -37,8 +37,8 @@ def get_bounding_rect(c):
         x, y, w, h, is_rect:
             Returns bounding rectangle over given contour and `is_rect` bool flag.
     """ # NOQA E501
-    # peri = cv2.arcLength(c, True)
-    approx = cv2.approxPolyDP(c, 3, True)
+    # epsilon = cv2.arcLength(c, True)
+    approx = cv2.approxPolyDP(c, 2, True)
     (x, y, w, h) = cv2.boundingRect(approx)
     if len(approx) == 4:
         return x, y, w, h, True
