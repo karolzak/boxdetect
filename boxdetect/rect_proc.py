@@ -106,7 +106,7 @@ def size_in_range(c, width_range=None, height_range=None):
     return True
 
 
-def wh_ratio_in_range(c, wh_ratio_range):
+def wh_ratio_in_range(c, wh_ratio_range, tolerance=0.05):
     """
     Performs 2 checks:
     1. Using `get_bounding_box` function it retrieves bounding box coords and `is_rect` bool flag which defines if given contour object is in fact a rectangle.
@@ -119,6 +119,9 @@ def wh_ratio_in_range(c, wh_ratio_range):
         wh_ratio_range (tuple):
             Tuple of ints like `(0.5, 1.5)` representing minimum and maximum value of rectangles width / height ratio.
             If given rectangle won't make it inside the range, function will return `False`.
+        tolerance (float):
+            Expands `wh_ratio_range` upper and lower boundries by tolerance value.
+            Defaults to `0.05`.
 
     Returns:
         bool:
@@ -126,7 +129,7 @@ def wh_ratio_in_range(c, wh_ratio_range):
     """ # NOQA E501
     (x, y, w, h, is_rect) = get_bounding_rect(c)
     ar = w / float(h)
-    if is_rect and ar >= wh_ratio_range[0] and ar <= wh_ratio_range[1]:
+    if is_rect and ar >= wh_ratio_range[0] * 1 - tolerance and ar <= wh_ratio_range[1] * 1 + tolerance:  # NOQA E501
         return True
     return False
 
