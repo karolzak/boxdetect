@@ -9,8 +9,8 @@ from boxdetect import config, pipelines
 
 def DefaultConfig():
     cfg = config.PipelinesConfig()
-    cfg.width_range = (25, 50)
-    cfg.height_range = (25, 50)
+    cfg.width_range = (30, 45)
+    cfg.height_range = (30, 45)
     cfg.scaling_factors = [1.0]
     cfg.wh_ratio_range = (0.5, 1.5)
     cfg.group_size_range = (1, 100)
@@ -64,8 +64,7 @@ def test_get_boxes(
     assert(len(grouping_rects) == exp_groups_count)
 
     cfg.morph_kernels_type = 'lines'
-    cfg.morph_kernels_lines_length = 30
-    cfg.morph_kernels_lines_thickness = 1
+    cfg.morph_kernels_thickness = 1
     rects, grouping_rects, image, output_image = pipelines.get_boxes(
         img, cfg=cfg, plot=False)
     assert(len(rects) == exp_rects_count)
