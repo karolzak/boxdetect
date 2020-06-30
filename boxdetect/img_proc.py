@@ -78,7 +78,8 @@ def apply_thresholding(image, plot=False):
 def get_rect_kernels(
         width_range, height_range,
         wh_ratio_range=(0.5, 1.1),
-        border_thickness=1):
+        border_thickness=1,
+        tolerance=0.02):
     """
     Returns a list of rectangular kernels for OpenCV morphological transformations.
     It's using `width_range`, `height_range` params to create all the possible combinations of rectangular kernels and performs filtering based on `wh_ratio_range`.
@@ -96,6 +97,9 @@ def get_rect_kernels(
         border_thickness (int, optional):
             Rectangles border thickness.
             Defaults to 1.
+        tolerance (float):
+            Expands `wh_ratio_range` upper and lower boundries by tolerance value.
+            Defaults to `0.05`.
 
     Returns:
         list of numpy.ndarray:
@@ -108,21 +112,27 @@ def get_rect_kernels(
                 (h - (2 * border_thickness), w - (2 * border_thickness)),
                 dtype=np.uint8),
             border_thickness, mode='constant', constant_values=1)
-        for w in range(*width_range)
-        for h in range(*height_range)
+        for w in range(
+            int((1 - tolerance) * width_range[0]),
+            int((1 + tolerance) * width_range[1]))
+        for h in range(
+            int((1 - tolerance) * height_range[0]),
+            int((1 + tolerance) * height_range[1]))
         if w / h >= wh_ratio_range[0] and w / h <= wh_ratio_range[1]
     ]
     return kernels
 
 
-def get_line_kernels(length, thickness=1):
+def get_line_kernels(horizontal_length, vertical_length, thickness=1):
     """
     Line kernels generator. Creates a list of two `numpy.ndarray` based on length and thickness.
     First kernel represents a vertical line and the second one represents a horizontal line.
 
     Args:
-        length (int):
-            Length of the lines to be created.
+        horizontal_length (int):
+            Length of the horizontal line kernel.
+        vertical_length (int):
+            Length of the vertical line kernel.
         thickness (int, optional):
             Thickness of the lines.
             Defaults to 1.
@@ -132,8 +142,8 @@ def get_line_kernels(length, thickness=1):
             List of two kernels representing vertical and horizontal lines.
     """ # NOQA E501
     kernels = [
-        np.ones((length, thickness), dtype=np.uint8),
-        np.ones((thickness, length), dtype=np.uint8),
+        np.ones((vertical_length, thickness), dtype=np.uint8),
+        np.ones((thickness, horizontal_length), dtype=np.uint8),
     ]
     return kernels
 
