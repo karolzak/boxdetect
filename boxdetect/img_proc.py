@@ -109,7 +109,9 @@ def get_rect_kernels(
     kernels = [
         np.pad(
             np.zeros(
-                (h - (2 * border_thickness), w - (2 * border_thickness)),
+                (h, w),
+                # h - (2 * border_thickness),
+                # w - (2 * border_thickness)),
                 dtype=np.uint8),
             border_thickness, mode='constant', constant_values=1)
         for w in range(
