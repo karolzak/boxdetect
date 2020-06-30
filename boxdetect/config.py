@@ -34,10 +34,7 @@ class PipelinesConfig:
         self.dilation_iterations = [0]
 
         self.morph_kernels_type = ['lines']  # 'rectangles'
-        self.morph_kernels_lines_length = [15]
-        self.morph_kernels_lines_thickness = [1]
-        # Rectangular kernels border thickness
-        self.border_thickness = [1]
+        self.morph_kernels_thickness = [1]
 
         # Rectangles grouping
         self.group_size_range = (1, 100)  # minimum number of rectangles in a group, >2 - will ignore groups with single rect  # NOQA E501
@@ -53,10 +50,10 @@ class PipelinesConfig:
         self.num_iterations = 1
         for variable in [
             self.width_range, self.height_range, self.wh_ratio_range,
-            self.dilation_kernel, self.border_thickness,
+            self.dilation_kernel,
             self.dilation_iterations, self.morph_kernels_type,
-            self.morph_kernels_lines_length, self.horizontal_max_distance,
-            self.morph_kernels_lines_thickness, self.vertical_max_distance
+            self.horizontal_max_distance,
+            self.morph_kernels_thickness, self.vertical_max_distance
         ]:
             if type(variable) is not list:
                 variable = [variable]
