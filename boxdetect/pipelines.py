@@ -184,11 +184,11 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         def get_iterators(cfg):
             variables_list = [
                 cfg.width_range, cfg.height_range, cfg.wh_ratio_range,
-                cfg.border_thickness, cfg.dilation_iterations,
+                cfg.dilation_iterations,
                 cfg.dilation_kernel, cfg.vertical_max_distance,
                 cfg.horizontal_max_distance,
-                cfg.morph_kernels_type, cfg.morph_kernels_lines_length,
-                cfg.morph_kernels_lines_thickness
+                cfg.morph_kernels_type,
+                cfg.morph_kernels_thickness
             ]
             return zip(
                 *[conv_to_list(variable, cfg.num_iterations)
@@ -196,21 +196,13 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
 
         for (
             width_range, height_range, wh_ratio_range,
-            border_thickness, dilation_iterations,
+            dilation_iterations,
             dilation_kernel, vertical_max_distance,
             horizontal_max_distance,
-            morph_kernels_type, morph_kernels_lines_length,
-            morph_kernels_lines_thickness
+            morph_kernels_type,
+            morph_kernels_thickness
         ) in get_iterators(cfg):
             image = image_scaled.copy()
-            print(
-                width_range, height_range, wh_ratio_range,
-                border_thickness, dilation_iterations,
-                dilation_kernel, vertical_max_distance,
-                horizontal_max_distance,
-                morph_kernels_type, morph_kernels_lines_length,
-                morph_kernels_lines_thickness
-            )
 
             min_w = int(width_range[0] * resize_ratio_inv)
             max_w = int(width_range[1] * resize_ratio_inv)
@@ -237,12 +229,13 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
                 kernels = img_proc.get_rect_kernels(
                     width_range=(min_w, max_w), height_range=(min_h, max_h),
                     wh_ratio_range=wh_ratio_range,
-                    border_thickness=border_thickness)
+                    border_thickness=morph_kernels_thickness)
             elif morph_kernels_type == 'lines':
                 # creating line-shape kernels to be used for image enhancing
                 kernels = img_proc.get_line_kernels(
-                    length=morph_kernels_lines_length,
-                    thickness=morph_kernels_lines_thickness)
+                    horizontal_length=int(min_w * 0.95),
+                    vertical_length=int(min_h * 0.95),
+                    thickness=morph_kernels_thickness)
 
             image = img_proc.apply_merge_transformations(
                 image, kernels, plot=plot)
