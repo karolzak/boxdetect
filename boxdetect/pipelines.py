@@ -174,26 +174,6 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         # (black pixels will become the background)
         image_scaled = img_proc.apply_thresholding(image_scaled, plot)
 
-        def conv_to_list(x, max_items):
-            if type(x) is list:
-                if len(x) >= max_items:
-                    return x
-                x = x[0]
-            return [x for i in range(max_items)]
-
-        def get_iterators(cfg):
-            variables_list = [
-                cfg.width_range, cfg.height_range, cfg.wh_ratio_range,
-                cfg.dilation_iterations,
-                cfg.dilation_kernel, cfg.vertical_max_distance,
-                cfg.horizontal_max_distance,
-                cfg.morph_kernels_type,
-                cfg.morph_kernels_thickness
-            ]
-            return zip(
-                *[conv_to_list(variable, cfg.num_iterations)
-                    for variable in variables_list])
-
         for (
             width_range, height_range, wh_ratio_range,
             dilation_iterations,
@@ -201,7 +181,7 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
             horizontal_max_distance,
             morph_kernels_type,
             morph_kernels_thickness
-        ) in get_iterators(cfg):
+        ) in cfg.variables_as_iterators():
             image = image_scaled.copy()
 
             min_w = int(width_range[0] * resize_ratio_inv)
