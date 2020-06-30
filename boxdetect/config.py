@@ -57,7 +57,82 @@ class PipelinesConfig:
         ]:
             if type(variable) is not list:
                 variable = [variable]
-            self.num_iterations = len(variable) if self.num_iterations < len(variable) else self.num_iterations
+            self.num_iterations = len(variable) if self.num_iterations < len(variable) else self.num_iterations  # NOQA E501
+
+    def __conv_to_list(self, x, max_items):
+        if type(x) is list:
+            if len(x) >= max_items:
+                return x
+            x = x[0]
+        return [x for i in range(max_items)]
+
+    def variables_as_iterators(self):
+        self.update_num_iterations()
+
+        variables_list = [
+            self.width_range, self.height_range, self.wh_ratio_range,
+            self.dilation_iterations,
+            self.dilation_kernel, self.vertical_max_distance,
+            self.horizontal_max_distance,
+            self.morph_kernels_type,
+            self.morph_kernels_thickness
+        ]
+        return zip(
+            *[self.__conv_to_list(variable, self.num_iterations)
+                for variable in variables_list])
+
+    def __add_margin_to_size(
+            self, size, margin_percent=0.1, margin_px_limit=5):
+        calc_margin = int((size * margin_percent))
+        return calc_margin if calc_margin < margin_px_limit else margin_px_limit  # NOQA E501
+
+    def autoconfigure(
+            self, box_sizes, epsilon=5,
+            margin_percent=0.1, margin_px_limit=5,
+            use_rect_kernel_for_small=False, rect_kernel_threshold=30):
+        from sklearn import cluster
+        import numpy as np
+
+        dbscan = cluster.DBSCAN(eps=epsilon, min_samples=1)
+        clusters = dbscan.fit_predict(box_sizes)
+        box_sizes = np.asarray(box_sizes)
+
+        hw_grouped = []
+
+        for i in range(0, max(clusters)+1):
+            group = box_sizes[clusters == i]
+
+            minh, maxh = (min(group[:, 0]), max(group[:, 0]))
+            minw, maxw = (min(group[:, 1]), max(group[:, 1]))
+
+            calc_minh = minh - self.__add_margin_to_size(
+                minh, margin_percent, margin_px_limit)
+            calc_maxh = maxh + self.__add_margin_to_size(
+                maxh, margin_percent, margin_px_limit)
+            calc_minw = minw - self.__add_margin_to_size(
+                minw, margin_percent, margin_px_limit)
+            calc_maxw = maxw + self.__add_margin_to_size(
+                maxw, margin_percent, margin_px_limit)
+
+            hw_grouped.append([
+                (calc_minh, calc_maxh), (calc_minw, calc_maxw),
+                sorted((calc_minw / calc_minh, calc_maxw / calc_maxh)),
+                'rectangles' if (
+                    use_rect_kernel_for_small
+                    and maxh <= rect_kernel_threshold
+                    and maxw <= rect_kernel_threshold)
+                else 'lines'
+            ])
+        hw_grouped = np.asarray(hw_grouped)
+
+        self.width_range = hw_grouped[:, 1].tolist()
+        self.height_range = hw_grouped[:, 0].tolist()
+        self.wh_ratio_range = hw_grouped[:, 2].tolist()
+        self.morph_kernels_type = hw_grouped[:, 3].tolist()
+
+        self.update_num_iterations()
+
+        return self
 
     def save_yaml(self, path):
         """
