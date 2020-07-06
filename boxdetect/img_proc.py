@@ -77,7 +77,7 @@ def apply_thresholding(image, plot=False):
 
 def get_rect_kernels(
         width_range, height_range,
-        wh_ratio_range=(0.5, 1.1),
+        wh_ratio_range=None,
         border_thickness=1,
         tolerance=0.02):
     """
@@ -92,8 +92,8 @@ def get_rect_kernels(
             Min/max height range for rectangular kernels.
             Should be adjusted to the pixel height of boxes to be detected on the image.
         wh_ratio_range (tuple, optional):
-            Width / Height ratio range. 
-            Defaults to (0.5, 1.1).
+            Width / Height ratio range. If None it will create ratio range based on width and height.
+            Defaults to None.
         border_thickness (int, optional):
             Rectangles border thickness.
             Defaults to 1.
@@ -109,9 +109,8 @@ def get_rect_kernels(
     kernels = [
         np.pad(
             np.zeros(
-                (h, w),
-                # h - (2 * border_thickness),
-                # w - (2 * border_thickness)),
+                # (h, w),
+                (h - (2 * border_thickness), w - (2 * border_thickness)),
                 dtype=np.uint8),
             border_thickness, mode='constant', constant_values=1)
         for w in range(

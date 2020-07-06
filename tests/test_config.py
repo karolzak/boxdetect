@@ -47,3 +47,23 @@ def test_autoconfig_simple():
         file_path, cfg=cfg, plot=False)
     assert(len(rects) == 23)
     assert(len(groups) == 14)
+
+
+def test_autoconfig_from_vott_simple():
+    vott_dir = "tests/data/autoconfig_simple"
+    file_path = "tests/data/autoconfig_simple/dummy_example.png"
+
+    cfg = config.PipelinesConfig()
+    cfg.autoconfigure_from_vott(vott_dir, class_tags=['box'])
+
+    checkboxes = pipelines.get_checkboxes(
+        file_path, cfg=cfg, px_threshold=0.01, plot=False, verbose=False)
+    assert(len(checkboxes) == 12)
+
+    cfg = config.PipelinesConfig()
+    cfg.autoconfigure_from_vott(vott_dir, class_tags=['box'])
+
+    rects, groups, _, _ = pipelines.get_boxes(
+        file_path, cfg=cfg, plot=False)
+    assert(len(rects) == 23)
+    assert(len(groups) == 14)

@@ -137,15 +137,8 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     cfg.update_num_iterations()
 
     # parameters
-    # width_range = cfg.width_range
-    # height_range = cfg.height_range
-    # wh_ratio_range = cfg.wh_ratio_range
-    # border_thickness = cfg.border_thickness
     thickness = cfg.thickness
     scaling_factors = cfg.scaling_factors
-
-    # dilation_kernel = cfg.dilation_kernel
-    # dilation_iterations = cfg.dilation_iterations
 
     group_size_range = cfg.group_size_range
     # vertical_max_distance = cfg.vertical_max_distance

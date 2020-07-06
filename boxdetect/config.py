@@ -1,4 +1,10 @@
+import glob
+import json
+import os
+
+import numpy as np
 import yaml
+from sklearn import cluster
 
 
 class PipelinesConfig:
@@ -23,7 +29,7 @@ class PipelinesConfig:
         # but also it takes more time to processing.
         # Too small scaling factor may cause false positives
         # Too big scaling factor will take a lot of processing time
-        self.scaling_factors = [0.5]
+        self.scaling_factors = [1.0]
 
         # Drawing rectangles
         self.thickness = 2
@@ -88,18 +94,15 @@ class PipelinesConfig:
 
     def autoconfigure(
             self, box_sizes, epsilon=5,
-            margin_percent=0.1, margin_px_limit=5,
-            use_rect_kernel_for_small=False, rect_kernel_threshold=30):
-        from sklearn import cluster
-        import numpy as np
-
+            margin_percent=0.1, margin_px_limit=30,
+            use_rect_kernel_for_small=True, rect_kernel_threshold=20):
         dbscan = cluster.DBSCAN(eps=epsilon, min_samples=1)
         clusters = dbscan.fit_predict(box_sizes)
         box_sizes = np.asarray(box_sizes)
 
         hw_grouped = []
 
-        for i in range(0, max(clusters)+1):
+        for i in range(0, max(clusters) + 1):
             group = box_sizes[clusters == i]
 
             minh, maxh = (min(group[:, 0]), max(group[:, 0]))
@@ -115,8 +118,8 @@ class PipelinesConfig:
                 maxw, margin_percent, margin_px_limit)
 
             hw_grouped.append([
-                (calc_minh, calc_maxh), (calc_minw, calc_maxw),
-                sorted((calc_minw / calc_minh, calc_maxw / calc_maxh)),
+                (calc_minw, calc_maxw), (calc_minh, calc_maxh),
+                sorted((calc_minw / calc_maxh, calc_maxw / calc_minh)),
                 'rectangles' if (
                     use_rect_kernel_for_small
                     and maxh <= rect_kernel_threshold
@@ -125,14 +128,29 @@ class PipelinesConfig:
             ])
         hw_grouped = np.asarray(hw_grouped)
 
-        self.width_range = hw_grouped[:, 1].tolist()
-        self.height_range = hw_grouped[:, 0].tolist()
+        self.width_range = hw_grouped[:, 0].tolist()
+        self.height_range = hw_grouped[:, 1].tolist()
         self.wh_ratio_range = hw_grouped[:, 2].tolist()
         self.morph_kernels_type = hw_grouped[:, 3].tolist()
 
         self.update_num_iterations()
 
         return self
+
+    def autoconfigure_from_vott(self, vott_dir, class_tags, **kwargs):
+        jsons = glob.glob(os.path.join(vott_dir, "*.json"))
+
+        hw_list = []
+
+        for js in jsons[:]:
+            with open(js, mode='r') as js_file:
+                for region in json.load(js_file)['regions']:
+                    if any(i in region['tags'] for i in class_tags):
+                        bbox = region['boundingBox']
+                        hw_list.append(
+                            (int(bbox['height']), int(bbox['width'])))
+
+        return self.autoconfigure(box_sizes=hw_list, **kwargs)
 
     def save_yaml(self, path):
         """
