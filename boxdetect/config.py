@@ -12,6 +12,7 @@ class PipelinesConfig:
         """  # NOQA E501
         Helper class to keep all the important config variables in a single place.
         Use `save_` / `load_` functions to store configs in files and load when necessary.
+        This class also contains a set `autoconfigure*` functions to automatically build a config based on a ground truth annotations or collection of box sizes.
 
         Args:
             yaml_path (str, optional): 
@@ -53,6 +54,10 @@ class PipelinesConfig:
         self.update_num_iterations()
 
     def update_num_iterations(self):
+        """
+        This function updates `self.num_iterations` value to match
+        the number of configuration sets to be run in the `pipelines`.
+        """
         self.num_iterations = 1
         for variable in [
             self.width_range, self.height_range, self.wh_ratio_range,
@@ -65,14 +70,35 @@ class PipelinesConfig:
                 variable = [variable]
             self.num_iterations = len(variable) if self.num_iterations < len(variable) else self.num_iterations  # NOQA E501
 
-    def __conv_to_list(self, x, max_items):
+    def __conv_to_list(self, x, list_length):
+        """Internal/private function.
+        Given an object `x` it will return the same object wrapped
+        in a list type if `x` is not a list already.
+
+        Args:
+            x (object):
+                `x` can be any object or a list.
+            list_length (int):
+                Length of the list to be returned.
+
+        Returns:
+            list:
+                Returns a list of `x` objects of length `list_length`
+        """
         if type(x) is list:
-            if len(x) >= max_items:
+            if len(x) >= list_length:
                 return x
             x = x[0]
-        return [x for i in range(max_items)]
+        return [x for i in range(list_length)]
 
     def variables_as_iterators(self):
+        """Takes a set of variables and converts them into iterators
+        based on `self.num_iterations` param.
+
+        Returns:
+            zip:
+                Configs variables as iterators.
+        """
         self.update_num_iterations()
 
         variables_list = [
@@ -87,8 +113,24 @@ class PipelinesConfig:
             *[self.__conv_to_list(variable, self.num_iterations)
                 for variable in variables_list])
 
-    def __add_margin_to_size(
+    def __calc_margin(
             self, size, margin_percent=0.1, margin_px_limit=5):
+        """Calculates by how much given `size` should be extended
+        based on provided params.
+
+        Args:
+            size (int):
+                Height or width value.
+            margin_percent (float, optional):
+                Float representing margin value in percents.
+                Defaults to 0.1.
+            margin_px_limit (int, optional):
+                Max limit on margin in pixels. Defaults to 5.
+
+        Returns:
+            int:
+                Margin in pixels.
+        """
         calc_margin = int((size * margin_percent))
         return calc_margin if calc_margin < margin_px_limit else margin_px_limit  # NOQA E501
 
@@ -96,6 +138,28 @@ class PipelinesConfig:
             self, box_sizes, epsilon=5,
             margin_percent=0.1, margin_px_limit=30,
             use_rect_kernel_for_small=True, rect_kernel_threshold=20):
+        """
+        Sets config params based on a list of box sizes (h, w).
+
+        Args:
+            box_sizes (list):
+                List of box sizes. Format: `[(h, w), (h, w)]`
+            epsilon (int, optional):
+                Epsilon value used for clustering algorithm (DBSCAN).
+                Defaults to 5.
+            margin_percent (float, optional):
+                Float representing margin value in percents.
+                Defaults to 0.1.
+            margin_px_limit (int, optional):
+                Max limit on margin in pixels. Defaults to 30.
+            use_rect_kernel_for_small (bool, optional):
+                Use `rectangles` kernel for rectangles
+                smaller than `rect_kernel_threshold`.
+                Defaults to True.
+            rect_kernel_threshold (int, optional):
+                Threshold for using `rectangles` kernel instead of `lines`.
+                Defaults to 20.
+        """
         dbscan = cluster.DBSCAN(eps=epsilon, min_samples=1)
         clusters = dbscan.fit_predict(box_sizes)
         box_sizes = np.asarray(box_sizes)
@@ -108,13 +172,13 @@ class PipelinesConfig:
             minh, maxh = (min(group[:, 0]), max(group[:, 0]))
             minw, maxw = (min(group[:, 1]), max(group[:, 1]))
 
-            calc_minh = minh - self.__add_margin_to_size(
+            calc_minh = minh - self.__calc_margin(
                 minh, margin_percent, margin_px_limit)
-            calc_maxh = maxh + self.__add_margin_to_size(
+            calc_maxh = maxh + self.__calc_margin(
                 maxh, margin_percent, margin_px_limit)
-            calc_minw = minw - self.__add_margin_to_size(
+            calc_minw = minw - self.__calc_margin(
                 minw, margin_percent, margin_px_limit)
-            calc_maxw = maxw + self.__add_margin_to_size(
+            calc_maxw = maxw + self.__calc_margin(
                 maxw, margin_percent, margin_px_limit)
 
             hw_grouped.append([
@@ -135,9 +199,19 @@ class PipelinesConfig:
 
         self.update_num_iterations()
 
-        return self
-
     def autoconfigure_from_vott(self, vott_dir, class_tags, **kwargs):
+        """
+        Reads annotation files from .json format for VoTT and
+        automatically creates best config.
+
+        Args:
+            vott_dir (string):
+                Directory with VoTT annotation files.
+            class_tags (list of strings):
+                List of tags to search for in annotations.
+            **kwargs:
+                Check `self.autoconfigure` for available kwargs.
+        """
         jsons = glob.glob(os.path.join(vott_dir, "*.json"))
 
         hw_list = []
@@ -150,7 +224,7 @@ class PipelinesConfig:
                         hw_list.append(
                             (int(bbox['height']), int(bbox['width'])))
 
-        return self.autoconfigure(box_sizes=hw_list, **kwargs)
+        self.autoconfigure(box_sizes=hw_list, **kwargs)
 
     def save_yaml(self, path):
         """
