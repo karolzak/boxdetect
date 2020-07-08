@@ -29,5 +29,6 @@ setup(
     ],
     packages=find_packages(),
     zip_safe=False,
-    install_requires=['opencv-python', 'numpy', 'imutils', 'pyyaml'],
+    install_requires=[
+        'opencv-python', 'numpy', 'imutils', 'pyyaml', 'sklearn'],
 )

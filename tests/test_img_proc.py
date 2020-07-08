@@ -36,7 +36,7 @@ def test_apply_merge_transformations():
         width_range=(min_w_res, max_w_res),
         height_range=(min_h_res, max_h_res),
         wh_ratio_range=cfg.wh_ratio_range,
-        border_thickness=cfg.border_thickness)
+        border_thickness=cfg.morph_kernels_thickness[0])
 
     image = img_proc.apply_merge_transformations(IMG1.copy(), kernels)
 

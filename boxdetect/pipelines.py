@@ -134,44 +134,30 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
     elif image_org.ndim == 2:
         ch = 1
 
+    cfg.update_num_iterations()
+
     # parameters
-    width_range = cfg.width_range
-    height_range = cfg.height_range
-    wh_ratio_range = cfg.wh_ratio_range
-    border_thickness = cfg.border_thickness
     thickness = cfg.thickness
     scaling_factors = cfg.scaling_factors
 
-    dilation_kernel = cfg.dilation_kernel
-    dilation_iterations = cfg.dilation_iterations
-
     group_size_range = cfg.group_size_range
-    vertical_max_distance = cfg.vertical_max_distance
-    horizontal_max_distance = cfg.horizontal_max_distance  # NOQA E501
+    # vertical_max_distance = cfg.vertical_max_distance
+    # horizontal_max_distance = cfg.horizontal_max_distance  # NOQA E501
 
     # process image using range of scaling factors
     cnts_list = []
     for scaling_factor in scaling_factors:
         # resize the image for processing time
-        image = image_org.copy()
-        image = imutils.resize(
-            image, width=int(image.shape[1] * scaling_factor))
+        image_scaled = image_org.copy()
+        image_scaled = imutils.resize(
+            image_scaled, width=int(image_scaled.shape[1] * scaling_factor))
 
-        resize_ratio = image_org.shape[0] / image.shape[0]
-        resize_ratio_inv = image.shape[0] / image_org.shape[0]
+        resize_ratio = image_org.shape[0] / image_scaled.shape[0]
+        resize_ratio_inv = image_scaled.shape[0] / image_org.shape[0]
 
-        min_w = int(width_range[0] * resize_ratio_inv)
-        max_w = int(width_range[1] * resize_ratio_inv)
-        min_h = int(height_range[0] * resize_ratio_inv)
-        max_h = int(height_range[1] * resize_ratio_inv)
-
-        area_range = (
-            round(min_w * min_h * 0.90),
-            round(max_w * max_h * 1.10)
-        )
         # convert the resized image to grayscale
         try:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image_scaled = cv2.cvtColor(image_scaled, cv2.COLOR_BGR2GRAY)
         except Exception:
             pass
             # print("WARNING: Failed to convert to grayscale... skipping")
@@ -179,51 +165,74 @@ def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
         # apply tresholding to get all the pixel values to either 0 or 255
         # this function also inverts colors
         # (black pixels will become the background)
-        image = img_proc.apply_thresholding(image, plot)
+        image_scaled = img_proc.apply_thresholding(image_scaled, plot)
 
-        # basic pixel inflation
-        kernel = cv2.getStructuringElement(
-            cv2.MORPH_RECT, dilation_kernel)
-        image = cv2.dilate(
-            image, kernel, iterations=dilation_iterations)
-        if plot:  # pragma: no cover
-            cv2.imshow("dilated", image)
-            cv2.waitKey(0)
+        for (
+            width_range, height_range, wh_ratio_range,
+            dilation_iterations,
+            dilation_kernel, vertical_max_distance,
+            horizontal_max_distance,
+            morph_kernels_type,
+            morph_kernels_thickness
+        ) in cfg.variables_as_iterators():
+            image = image_scaled.copy()
 
-        if cfg.morph_kernels_type == 'rectangles':
-            # creating rectangular-shape kernels to be used for
-            # extracting rectangular shapes
-            kernels = img_proc.get_rect_kernels(
-                width_range=(min_w, max_w), height_range=(min_h, max_h),
-                wh_ratio_range=wh_ratio_range,
-                border_thickness=border_thickness)
-        elif cfg.morph_kernels_type == 'lines':
-            # creating line-shape kernels to be used for image enhancing step
-            # try it out only in case of very poor results with previous setup
-            kernels = img_proc.get_line_kernels(
-                length=cfg.morph_kernels_lines_length,
-                thickness=cfg.morph_kernels_lines_thickness)
+            min_w = int(width_range[0] * resize_ratio_inv)
+            max_w = int(width_range[1] * resize_ratio_inv)
+            min_h = int(height_range[0] * resize_ratio_inv)
+            max_h = int(height_range[1] * resize_ratio_inv)
 
-        image = img_proc.apply_merge_transformations(
-            image, kernels, plot=plot)
+            area_range = (
+                round(min_w * min_h * 0.90),
+                round(max_w * max_h * 1.10)
+            )
 
-        # find contours in the thresholded image
-        cnts = rect_proc.get_contours(image)
-        # filter countours based on area size
-        cnts = rect_proc.filter_contours_by_area_size(cnts, area_range)
-        # rescale countours to original image size
-        cnts = rect_proc.rescale_contours(cnts, resize_ratio)
-        # add countours detected with current scaling factor run
-        # to the global collection
-        cnts_list += cnts
+            # basic pixel inflation
+            kernel = cv2.getStructuringElement(
+                cv2.MORPH_RECT, dilation_kernel)
+            image = cv2.dilate(
+                image, kernel, iterations=dilation_iterations)
+            if plot:  # pragma: no cover
+                cv2.imshow("dilated", image)
+                cv2.waitKey(0)
 
-    cnts_list = rect_proc.filter_contours_by_size_range(
-        cnts_list, width_range, height_range)
+            if morph_kernels_type == 'rectangles':
+                # creating rectangular-shape kernels to be used for
+                # extracting rectangular shapes
+                kernels = img_proc.get_rect_kernels(
+                    width_range=(min_w, max_w), height_range=(min_h, max_h),
+                    wh_ratio_range=wh_ratio_range,
+                    border_thickness=morph_kernels_thickness)
+            elif morph_kernels_type == 'lines':
+                # creating line-shape kernels to be used for image enhancing
+                kernels = img_proc.get_line_kernels(
+                    horizontal_length=int(min_w * 0.95),
+                    vertical_length=int(min_h * 0.95),
+                    thickness=morph_kernels_thickness)
 
-    # filter global countours by rectangle WxH ratio
-    cnts_list = rect_proc.filter_contours_by_wh_ratio(
-        cnts_list, wh_ratio_range)
+            image = img_proc.apply_merge_transformations(
+                image, kernels, plot=plot)
 
+            # find contours in the thresholded image
+            cnts = rect_proc.get_contours(image)
+
+            # filter countours based on area size
+            cnts = rect_proc.filter_contours_by_area_size(cnts, area_range)
+
+            # rescale countours to original image size
+            cnts = rect_proc.rescale_contours(cnts, resize_ratio)
+
+            cnts = rect_proc.filter_contours_by_size_range(
+                cnts, width_range, height_range)
+
+            # filter global countours by rectangle WxH ratio
+            cnts = rect_proc.filter_contours_by_wh_ratio(
+                cnts, wh_ratio_range)
+            # add countours detected with current scaling factor run
+            # to the global collection
+            cnts_list += cnts
+
+    # rects = [rect_proc.get_bounding_rect(c)[:4] for c in cnts]
     # merge rectangles into group if overlapping
     rects = rect_proc.group_countours(cnts_list)
 
