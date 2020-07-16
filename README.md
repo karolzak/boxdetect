@@ -49,6 +49,7 @@ You can use `BoxDetect` either by leveraging one of the pre-made pipelines or by
 ## Using `boxdetect.pipelines`
 
 ### Detect character boxes and group them together
+[[back to usage examples]](#usage-examples)
 
 Start with getting the default `PipelinesConfig` and adjusting it for your requirements and data:
 ```python
@@ -110,6 +111,7 @@ plt.show()
 ![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/example1.png)
 
 ### Highlighting just the checkboxes
+[[back to usage examples]](#usage-examples)
 
 And if you would like to highlight only the checkboxes you just need to change a single parameter:
 ```python
@@ -120,6 +122,7 @@ cfg.group_size_range = (1, 1)
 ![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/checkbox-example.jpg)
 
 ### Using `boxdetect.pipelines.get_checkboxes` to retrieve and recognize just the checkboxes
+[[back to usage examples]](#usage-examples)
 
 Assuming we're using the same image and config is already adjusted ([look above](#Detect-character-boxes-and-group-them-together)) we just need to run:
 
@@ -161,6 +164,7 @@ We should see the following:
 
 
 ### Using `boxdetect.config.PipelinesConfig.autoconfigure` to quickly and easily setup a config params based on the box sizes list
+[[back to usage examples]](#usage-examples)
 
 BoxDetect allows you to provide a list of sizes (h, w) of boxes which you are interested in and based on that list it would automatically set up the config to detect those.
 
@@ -183,13 +187,14 @@ checkboxes = get_checkboxes(file_path, cfg=cfg, plot=False)
 ```
 
 ### Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to quickly and easily setup a config params based on the annotated ground truth
+[[back to usage examples]](#usage-examples)
 
 Another option is to use ground truth annotations from VoTT.  
 Check VoTT repo and docs on how to create a new project and start labelling your data: https://github.com/microsoft/VoTT
 
 For this example I used VoTT to label my input image and my VoTT project looks somewhat like that:
 
-![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/vott1.jpg)
+![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/vott1.JPG)
 
 In principle you only need to mark a single box for each different size however the more boxes you will annotate - the more accurate the results should be.
 
