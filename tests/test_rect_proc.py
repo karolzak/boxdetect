@@ -1,11 +1,8 @@
 import pytest
 import numpy as np
-import cv2
 import sys
 sys.path.append(".")
 sys.path.append("../.")
-
-from boxdetect import config
 from boxdetect import rect_proc
 
 
@@ -113,23 +110,23 @@ def test_filter_contours_by_area_size():
     assert((cnts == TEST_CNTS[0]).all())
 
 
-def test_filter_contours_by_rect_ratio():
+def test_filter_contours_by_wh_ratio():
     wh_ratio_range = (0.5, 1.0)
-    cnts = rect_proc.filter_contours_by_rect_ratio(
+    cnts = rect_proc.filter_contours_by_wh_ratio(
         TEST_CNTS_SCALED, wh_ratio_range)
     assert(len(cnts) == 1)
     assert((cnts == TEST_CNTS_SCALED[0]).all())
 
 
-def test_check_rect_ratio():
+def test_wh_ratio_in_range():
     wh_ratio_range = (0.5, 1.0)
-    is_rect = rect_proc.check_rect_ratio(TEST_CNTS_SCALED[0], wh_ratio_range)
+    is_rect = rect_proc.wh_ratio_in_range(TEST_CNTS_SCALED[0], wh_ratio_range)
     assert(is_rect is True)
 
 
 def test_group_countours():
     test_cnts = [TEST_CNTS_SCALED[0], TEST_CNTS_SCALED[0]]
-    rects = rect_proc.group_countours(test_cnts, overlap_threshold=0.5)
+    rects = rect_proc.group_countours(test_cnts, epsilon=0.1)
     assert((rects == [[374,  74,  32,  32]]).all())
 
 
@@ -146,3 +143,34 @@ def test_rescale_contours():
     cnts = rect_proc.rescale_contours(TEST_CNTS, resize_ratio)
     for x, y in zip(cnts, TEST_CNTS_SCALED):
         assert((y == x).all())
+
+
+def test_filter_contours_by_size_range():
+    results = rect_proc.filter_contours_by_size_range(
+        TEST_CNTS_SCALED, width_range=None, height_range=None)
+    assert(results == TEST_CNTS_SCALED)
+    results = rect_proc.filter_contours_by_size_range(
+        CNTS1, width_range=(13, 20), height_range=(13, 20))
+    assert(len(results) == 10)
+    results = rect_proc.filter_contours_by_size_range(
+        CNTS1, width_range=(130, 140))
+    assert(len(results) == 1)
+
+
+def test_size_in_range():
+    c = TEST_CNTS_SCALED[0]
+    result = rect_proc.size_in_range(
+        c, width_range=None, height_range=None)
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, width_range=(10, 10), height_range=None)
+    assert(not result)
+    result = rect_proc.size_in_range(
+        c, width_range=(30, 35), height_range=None)
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, height_range=(30, 35))
+    assert(result)
+    result = rect_proc.size_in_range(
+        c, width_range=(30, 35), height_range=(30, 35))
+    assert(result)
