@@ -52,6 +52,7 @@ You can use `BoxDetect` either by leveraging one of the pre-made pipelines or by
     - [Using `boxdetect.pipelines.get_checkboxes` to retrieve checkboxes and their values](#using-boxdetectpipelinesget_checkboxes-to-retrieve-and-recognize-just-the-checkboxes)  
     - [Using `boxdetect.config.PipelinesConfig.autoconfigure` to setup a config params based on the box sizes list](#using-boxdetectconfigpipelinesconfigautoconfigure-to-quickly-and-easily-setup-a-config-params-based-on-the-box-sizes-list)  
     - [Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to setup a config params based on the annotated ground truth](#using-boxdetectconfigpipelinesconfigautoconfigure_from_vott-to-quickly-and-easily-setup-a-config-params-based-on-the-annotated-ground-truth)  
+    - [Saving and loading configuration to and from `yaml` files](#Saving-and-loading-configuration-to-and-from-yaml-files)  
 
 
 ## Using `boxdetect.pipelines`
@@ -221,4 +222,19 @@ And after doing that you can use any of the `boxdetect.pipelines` functions as b
 from boxdetect.pipelines import get_checkboxes
 
 checkboxes = get_checkboxes(file_path, cfg=cfg, plot=False)
+```
+
+### Saving and loading configuration to and from `yaml` files
+[[back to usage examples]](#usage-examples)
+
+If you want to save a specific configuration for later reusability or automation purposes you can do so by using `PipelinesConfig` functions: `save_yaml` and `load_yaml` like below:
+
+```python
+from boxdetect import config
+
+cfg = config.PipelinesConfig()
+cfg.morph_kernels_thickness = 10
+cfg.save_yaml('test_cfg.yaml')
+
+cfg2.load_yaml('test_cfg.yaml')
 ```
