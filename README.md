@@ -15,6 +15,14 @@ Main purpose of this library is to provide helpful functions for processing docu
 
 ![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/example1.png)
 
+## Features
+- `boxdetect.pipelines.get_boxes` - basic pipeline for boxes extraction
+- `boxdetect.pipelines.get_checkboxes` - pipeline which returns only the checkboxes with simple estimation of the state (checked/unchecked)
+- `boxdetect.config.PipelinesConfig` - advanced config class used to run pipelines
+- `boxdetect.config.PipelinesConfig.save_yaml/load_yaml` - allows to save and load configs into and from yaml files
+- `boxdetect.config.PipelinesConfig.autoconfigure` - simple mechanism to automatically set config based on box sizes list you're looking for
+- `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` - automatically sets up config based on ground truth/annotation json files from [VoTT](https://github.com/microsoft/VoTT)
+- `boxdetect.img_proc` and `boxdetect.rect_proc` - utility functions which can be used to build custom pipelines
 
 ## Getting Started
 
