@@ -28,29 +28,39 @@ def get_checkboxes(
         - checkbox_coords - `numpy.ndarray` rectangle (x,y,width,height)
         - contains_pixels - `bool`, True/False
         - cropped_checkbox - `numpy.ndarray` of cropped checkbox image
+        ::
+
+            [
+                [checkbox1_coords, contains_pixels1, cropped_checkbox1],
+                [checkbox2_coords, contains_pixels2, cropped_checkbox2],
+                ...
+            ]
 
     Args:
-        img (str or numpy.ndarray):
-            Input image. Can be passed in either as
-            `string` (filepath) or as `numpy.ndarray` represting an image
-        cfg (boxdetect.config object):
-            Object holding all the necessary settings to run this pipeline
-        px_threshold (float, optional):
-            This is the threshold used when estimating if pixels are present inside the checkbox.
+        img (str or numpy.ndarray): Input image.
+            Can be passed in either as `string` (filepath) or as `numpy.ndarray` representing an image
+        cfg (boxdetect.config object): Object holding all the necessary settings to run this pipeline
+        px_threshold (float, optional): This is the threshold used when estimating if pixels are present inside the checkbox.
             Defaults to 0.1.
-        plot (bool, optional):
-            Display different stages of image being processed.
+        plot (bool, optional): Display different stages of image being processed.
             Defaults to False.
-        verbose (bool, optional):
-            Defines if messages should be printed or not.
+        verbose (bool, optional): Defines if messages should be printed or not.
             Defaults to False.
 
     Returns:
-        numpy.ndarray:
-            Return an array of arrays with following values: `[checkbox_coords, contains_pixels, cropped_checkbox]`                    
-            - checkbox_coords - `numpy.ndarray` rectangle (x,y,width,height)
-            - contains_pixels - `bool`, True/False
-            - cropped_checkbox - `numpy.ndarray` of cropped checkbox image
+        numpy.ndarray: Return an array of arrays with following values:
+            checkbox_coords - `numpy.ndarray` rectangle (x,y,width,height)
+            contains_pixels - `bool`, True/False
+            cropped_checkbox - `numpy.ndarray` of cropped checkbox image
+            ::
+
+                [
+                    [checkbox1_coords, contains_pixels1, cropped_checkbox1],
+                    [checkbox2_coords, contains_pixels2, cropped_checkbox2],
+                    ...
+                ]
+            
+            
     """ # NOQA E501
     # st group_size_range to (1, 1) to focus on single box groups only (checkboxes) # NOQA E501
     cfg.group_size_range = (1, 1)
