@@ -6,7 +6,7 @@
 
 **Share:**  
 [![Twitter URL](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2karolzak%2Fboxdetect)](http://twitter.com/share?text=Check%20out%20BoxDetect%20Python%20package%20which%20helps%20you%20extract%20rectangular%20boxes%20from%20images&url=https://github.com/karolzak/boxdetect/&hashtags=python,computervision,boxesdetection,shapesdetection,opencv)
-[![LinkedIn URL](images/linkedin_share.png)](http://www.linkedin.com/shareArticle?mini=true&url=https://github.com/karolzak/boxdetect&title=Boxdetect%20python%20package)
+[![LinkedIn URL](images/linkedin_share4.png)](http://www.linkedin.com/shareArticle?mini=true&url=https://github.com/karolzak/boxdetect&title=Boxdetect%20python%20package)
 
 
 **BoxDetect** is a Python package based on OpenCV which allows you to easily detect rectangular shapes like character or checkbox boxes on scanned forms.
