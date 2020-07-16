@@ -38,12 +38,12 @@ pip install boxdetect
 
 You can use `BoxDetect` either by leveraging one of the pre-made pipelines or by treating `BoxDetect` functions as your toolbox to compose your own pipelines that fits your needs perfectly.
 
-- [Using pre-made pipelines](#Using-`boxdetect.pipelines`)  
+- [Using pre-made pipelines](#using-boxdetectpipelines)  
     - [Detecting boxes and grouping them together with `boxdetect.pipelines.get_boxes`](#Detect-character-boxes-and-group-them-together)  
-    - [Changing `group_size_range` param to highlight checkboxes](#Highlighting-just-the-checkboxes)  
-    - [Using `boxdetect.pipelines.get_checkboxes` to retrieve checkboxes and their values](#Using-`boxdetect.pipelines.get_checkboxes`-to-retrieve-and-recognize-just-the-checkboxes)  
-    - [Using `boxdetect.config.PipelinesConfig.autoconfigure` to setup a config params based on the box sizes list](#Using-`boxdetect.config.PipelinesConfig.autoconfigure`-to-quickly-and-easily-setup-a-config-params-based-on-the-box-sizes-list)  
-    - [Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to setup a config params based on the annotated ground truth](#Using-`boxdetect.config.PipelinesConfig.autoconfigure_from_vott`-to-quickly-and-easily-setup-a-config-params-based-on-the-annotated-ground-truth)  
+    - [Changing `group_size_range` param to highlight checkboxes](#highlighting-just-the-checkboxes)  
+    - [Using `boxdetect.pipelines.get_checkboxes` to retrieve checkboxes and their values](#using-boxdetectpipelinesget_checkboxes-to-retrieve-and-recognize-just-the-checkboxes)  
+    - [Using `boxdetect.config.PipelinesConfig.autoconfigure` to setup a config params based on the box sizes list](#using-boxdetectconfigpipelinesconfigautoconfigure-to-quickly-and-easily-setup-a-config-params-based-on-the-box-sizes-list)  
+    - [Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to setup a config params based on the annotated ground truth](#using-boxdetectconfigpipelinesconfigautoconfigure_from_vott-to-quickly-and-easily-setup-a-config-params-based-on-the-annotated-ground-truth)  
 
 
 ## Using `boxdetect.pipelines`
