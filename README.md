@@ -6,7 +6,7 @@
 
 **Share:**  
 [![Twitter URL](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2karolzak%2Fboxdetect)](http://twitter.com/share?text=Check%20out%20BoxDetect%20Python%20package%20which%20helps%20you%20extract%20rectangular%20boxes%20from%20images&url=https://github.com/karolzak/boxdetect/&hashtags=python,computervision,boxesdetection,shapesdetection,opencv)
-<!-- [![LinkedIn URL]()](http://www.linkedin.com/shareArticle?mini=true&url=https://github.com/karolzak/boxdetect&title=Boxdetect%20python%20package) -->
+[![LinkedIn URL](images/linkedin_share.png)](http://www.linkedin.com/shareArticle?mini=true&url=https://github.com/karolzak/boxdetect&title=Boxdetect%20python%20package)
 
 
 **BoxDetect** is a Python package based on OpenCV which allows you to easily detect rectangular shapes like character or checkbox boxes on scanned forms.
@@ -18,8 +18,7 @@ Main purpose of this library is to provide helpful functions for processing docu
 
 ## Getting Started
 
-Checkout the [examples below](#Usage-examples) and 
-[get-started-pipelines.ipynb](https://github.com/karolzak/boxdetect/blob/master/notebooks/get-started-pipelines.ipynb) notebook which holds end to end examples for using **BoxDetect** with premade `boxdetect.pipelines` functions.
+Checkout [usage examples below](#Usage-examples) to get a better understanding of how it works or go to [get-started-pipelines.ipynb](https://github.com/karolzak/boxdetect/blob/master/notebooks/get-started-pipelines.ipynb) and [get-started-autoconfig.ipynb](https://github.com/karolzak/boxdetect/blob/master/notebooks/get-started-autoconfig.ipynb) notebooks which holds step by step examples for using **BoxDetect** with premade `boxdetect.pipelines` functions.
 
 ## Installation
 
@@ -40,9 +39,11 @@ pip install boxdetect
 You can use `BoxDetect` either by leveraging one of the pre-made pipelines or by treating `BoxDetect` functions as your toolbox to compose your own pipelines that fits your needs perfectly.
 
 - [Using pre-made pipelines](#Using-`boxdetect.pipelines`)  
-    - [Detecting boxes and grouping them together with boxdetect.pipelines.get_boxes](#Detect-character-boxes-and-group-them-together)  
+    - [Detecting boxes and grouping them together with `boxdetect.pipelines.get_boxes`](#Detect-character-boxes-and-group-them-together)  
     - [Changing `group_size_range` param to highlight checkboxes](#Highlighting-just-the-checkboxes)  
     - [Using `boxdetect.pipelines.get_checkboxes` to retrieve checkboxes and their values](#Using-`boxdetect.pipelines.get_checkboxes`-to-retrieve-and-recognize-just-the-checkboxes)  
+    - [Using `boxdetect.config.PipelinesConfig.autoconfigure` to setup a config params based on the box sizes list](#Using-`boxdetect.config.PipelinesConfig.autoconfigure`-to-quickly-and-easily-setup-a-config-params-based-on-the-box-sizes-list)  
+    - [Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to setup a config params based on the annotated ground truth](#Using-`boxdetect.config.PipelinesConfig.autoconfigure_from_vott`-to-quickly-and-easily-setup-a-config-params-based-on-the-annotated-ground-truth)  
 
 
 ## Using `boxdetect.pipelines`
@@ -156,5 +157,55 @@ for checkbox in checkboxes:
 ```
 We should see the following:
 
-![](images/checkboxes-details.jpg)
 ![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/checkboxes-details.jpg)
+
+
+### Using `boxdetect.config.PipelinesConfig.autoconfigure` to quickly and easily setup a config params based on the box sizes list
+
+BoxDetect allows you to provide a list of sizes (h, w) of boxes which you are interested in and based on that list it would automatically set up the config to detect those.
+
+```python
+from boxdetect import config
+
+cfg = config.PipelinesConfig()
+
+# The values I'm providing below is a list of box sizes I'm interested in and want to focus on
+# [(h, w), (h, w), ...]
+cfg.autoconfigure([(46, 46), (44, 43)])
+```
+
+And after doing that you can use any of the `boxdetect.pipelines` functions as bellow:
+
+```python
+from boxdetect.pipelines import get_checkboxes
+
+checkboxes = get_checkboxes(file_path, cfg=cfg, plot=False)
+```
+
+### Using `boxdetect.config.PipelinesConfig.autoconfigure_from_vott` to quickly and easily setup a config params based on the annotated ground truth
+
+Another option is to use ground truth annotations from VoTT.  
+Check VoTT repo and docs on how to create a new project and start labelling your data: https://github.com/microsoft/VoTT
+
+For this example I used VoTT to label my input image and my VoTT project looks somewhat like that:
+
+![](https://raw.githubusercontent.com/karolzak/boxdetect/master/images/vott1.jpg)
+
+In principle you only need to mark a single box for each different size however the more boxes you will annotate - the more accurate the results should be.
+
+```python
+from boxdetect import config
+
+cfg = config.PipelinesConfig()
+
+cfg.autoconfigure_from_vott(
+    vott_dir="../tests/data/autoconfig_simple", class_tags=["box"])
+```
+
+And after doing that you can use any of the `boxdetect.pipelines` functions as bellow:
+
+```python
+from boxdetect.pipelines import get_checkboxes
+
+checkboxes = get_checkboxes(file_path, cfg=cfg, plot=False)
+```
