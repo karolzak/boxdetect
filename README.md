@@ -1,7 +1,9 @@
 [![CI Build](https://github.com/karolzak/boxdetect/workflows/CI%20Build/badge.svg)](https://github.com/karolzak/boxdetect/actions?query=workflow%3A%22CI+Build%22)
 [![PyPI - Version](https://img.shields.io/pypi/v/boxdetect.svg "PyPI version")](https://pypi.org/project/boxdetect/) 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/boxdetect)](https://pypi.org/project/boxdetect/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/boxdetect)](https://pypi.org/project/boxdetect/)
+<!---[![PyPI - Downloads](https://img.shields.io/pypi/dm/boxdetect)](https://pypi.org/project/boxdetect/)-->
+[![Downloads](https://pepy.tech/badge/boxdetect)](https://pepy.tech/project/boxdetect)
+[![Downloads/Month](https://pepy.tech/badge/boxdetect/month)](https://pepy.tech/project/boxdetect/month)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/karolzak/boxdetect/blob/master/LICENSE)
 
 **Share:**  
