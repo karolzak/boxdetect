@@ -110,7 +110,7 @@ OUT:
  (779, 1052, 156, 33),
  (253, 1256, 445, 33)]
 ```
-
+```import matplotlib.pyplot as plt```
 Display output image with bounding rectangles drawn on it
 ```python
 plt.figure(figsize=(20,20))
