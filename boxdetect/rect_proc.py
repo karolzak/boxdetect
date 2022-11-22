@@ -129,7 +129,7 @@ def wh_ratio_in_range(c, wh_ratio_range, tolerance=0.05):
     """ # NOQA E501
     (x, y, w, h, is_rect) = get_bounding_rect(c)
     ar = w / float(h)
-    if is_rect and ar >= wh_ratio_range[0] * 1 - tolerance and ar <= wh_ratio_range[1] * 1 + tolerance:  # NOQA E501
+    if is_rect and ar >= wh_ratio_range[0] * (1 - tolerance) and ar <= wh_ratio_range[1] * (1 + tolerance):  # NOQA E501
         return True
     return False
 
