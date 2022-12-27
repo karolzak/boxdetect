@@ -6,7 +6,7 @@ with open("README.md") as f:
 
 setup(
     name="boxdetect",
-    version="1.0.0",
+    version="1.0.1",
     description="boxdetect is a Python package based on OpenCV which allows you to easily detect rectangular shapes like characters boxes on scanned forms.",
     long_description=long_description,
     long_description_content_type="text/markdown",  # This is important!
