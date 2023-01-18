@@ -98,7 +98,7 @@ def get_checkboxes(
                     img, rect), px_threshold, verbose=verbose),
             img_proc.get_checkbox_crop(img, rect)
         ]
-        for rect in grouping_rects])
+        for rect in grouping_rects], dtype=object)
 
 
 def get_boxes(img, cfg: config.PipelinesConfig, plot=False):
