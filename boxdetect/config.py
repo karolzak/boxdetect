@@ -190,7 +190,7 @@ class PipelinesConfig:
                     and maxw <= rect_kernel_threshold)
                 else 'lines'
             ])
-        hw_grouped = np.asarray(hw_grouped)
+        hw_grouped = np.asarray(hw_grouped, dtype=object)
 
         self.width_range = hw_grouped[:, 0].tolist()
         self.height_range = hw_grouped[:, 1].tolist()
